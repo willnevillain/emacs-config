@@ -17,10 +17,8 @@
   '(better-defaults 
     elpy ;; python
     jedi
-    restclient ;; misc
+    restclient ;; misc & themes
     json-mode
-    nord-theme ;; themes
-    material-theme
     dracula-theme))
 
 (mapc #'(lambda (package)
