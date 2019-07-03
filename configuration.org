@@ -8,7 +8,6 @@
 Almost all of this lifted from other, more sophisticated Emacs users. Those of 
 note linked below:
 [[https://github.com/abrochard/emacs-config][abrochard]]
-[[https://github.com/mm--/dot-emac][jmm]]
 [[https://github.com/hrs/dotfiles/tree/master/emacs/.emacs.d][hrs]]
 
 * Configure =use-package=
@@ -31,19 +30,66 @@ Always compile packages, and use the newest version available.
   (setq load-prefer-newer t)
 #+END_SRC
 
-* Base GUI config
-
+* UI/UX
 I only use GUI emacs - these are baseline modifications.
-
+** Windows, Frames and Buffers
+*** Disable noisy emacs GUI elements
 #+BEGIN_SRC emacs-lisp
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
-
+#+END_SRC
+*** If OS X "bonks" at me one more time
+#+BEGIN_SRC emacs-lisp
 (setq ring-bell-function 'ignore)
 #+END_SRC
+*** Start in full screen by default
+#+BEGIN_SRC emacs-lisp
+(toggle-frame-maximized)
+#+END_SRC
+*** Scratch buffer empty, please.
+#+BEGIN_SRC emacs-lisp
+(setq initial-scratch-message nil)
+#+END_SRC
+*** Inhibit startup message.
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+#+END_SRC
+*** Global line numbers
+#+BEGIN_SRC emacs-lisp
+(global-linum-mode t)
+#+END_SRC
+** UI
+*** Theme
+Currently I'm digging gruvbox
+#+BEGIN_SRC emacs-lisp
+(use-package gruvbox-theme
+  :defer t
+  :init (load-theme 'gruvbox-dark-medium t))
+#+END_SRC
+*** All the icons!
+all-the-icons makes neotree look cooler. Workaround to install fonts if not already installed.
+#+BEGIN_SRC emacs-lisp
+(use-package all-the-icons
+  :config (lambda ()  ;; workaround to only install fonts if not already installed
+            (unless (member "all-the-icons" (font-family-list))
+              (all-the-icons-install-fonts t))))
+#+END_SRC
+** UX
+*** Ask for confirmation before quitting
+The number of times I've fat fingered C-x C-c...
+#+BEGIN_SRC emacs-lisp
+(setq confirm-kill-emacs 'y-or-n-p)
+#+END_SRC
+*** Accept "y" and "n" in place of "yes" and "no"
+#+BEGIN_SRC emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+*** Auto-indent on RET rather than just C-j
+#+BEGIN_SRC emacs-lisp
+(define-key global-map (kbd "RET") 'newline-and-indent)
+#+END_SRC
 * Personal Information
-
 #+BEGIN_SRC emacs-lisp
   (setq user-full-name "William Neville"
         user-mail-address "william@neville.com"
@@ -53,7 +99,6 @@ I only use GUI emacs - these are baseline modifications.
 #+END_SRC
 
 * Version Control
-
 ** Magit
 
 You can basically do everything from magit-status.
@@ -64,9 +109,8 @@ You can basically do everything from magit-status.
 #+END_SRC
 
 ** Utility Functions
-
+*** Git blame
 #+BEGIN_SRC emacs-lisp
-;; Git blame func
 (defun git-blame-line ()
   "Runs `git blame` on the current line and
    adds the commit id to the kill ring"
@@ -97,7 +141,6 @@ Base configuration.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org
-  :ensure org-plus-contrib
   :bind (("C-c l" . org-store-link)
          ("C-c a" . org-agenda)))
 #+END_SRC
@@ -122,162 +165,9 @@ so this behooves me.
         '(("t" "Todo" entry
            (file+headline "~/Dropbox/org/gtd.org" "Tasks")
            "* TODO %?\n %i\n %a")
-          ("c" "Chinese Word" entry
-           (file+headline "~/Dropbox/org/chinese.org" "Words")
-           "* <[%(dub/chinese-prompt)]> :drill:\n Added: %U\nDefinition:\n%(dub/chinese-get-definition (dub/chinese-dict-find dub/chinese-word))\n** Characters\n%(dub/chinese-get-word dub/chinese-word-dict)\n** Pronunciation\n%(dub/chinese-get-pronunciation dub/chinese-word-dict)\n")))
-
-#+END_SRC
-
-** Chinese
-
-I'm using Emacs as spaced repetition software to learn Chinese. This workflow
-is lifted almost entirely from [[https://youtu.be/uraPXeLfWcM][this excellent talk]] by Josh Moller-Mara, major 
-shoutout to him. Relevant capture templates are defined above.
-
-*** Org-drill
-
-
-Require org-drill, add noise to card due dates to reduce clumping, different
-cloze delimiters.
-
-#+BEGIN_SRC emacs-lisp
-(use-package org-drill
-  :disabled
-  :after org)
-
-(add-to-list 'org-modules 'org-drill)
-(org-load-modules-maybe t)  ;; TODO this is the only way I could get org-drill working but is not the best way to do this
-(setq org-drill-add-random-noise-to-intervals-p t)
-(setq org-drill-hint-separator "||")
-(setq org-drill-left-cloze-delimiter "<[")
-(setq org-drill-right-cloze-delimiter "]>")
-(setq org-drill-learn-fraction 0.25)
-(setq org-drill--lapse-very-overdue-entries-p t)
-#+END_SRC
-
-*** Utility functions
-
-Lifted directly from [[https://github.com/mm--/dot-emacs/blob/master/elisp/josh-chinese.el][Josh Moller-Mara]], huge props to this guy.
-I changed the preceding identifier from 'josh' to 'dub', but it's all his code.
-
-#+BEGIN_SRC emacs-lisp
-(defvar dub/chinese-dictionary-path
-  "~/Dropbox/org/chinese/cedict_ts.u8"
-  "Where we store the Chinese dictionary cedict_ts.u8")
-
-(defun dub/chinese-prompt ()
-  "Prompt for a character, return it"
-  (setq dub/chinese-word (read-from-minibuffer "Word/Phrase: ")))
-
-(defun dub/chinese-dict-find (phrase)
-  "Find a chinese word or phrase in the dictionary"
-  (with-temp-buffer
-    (insert-file-contents dub/chinese-dictionary-path)
-    (let (definitions)
-      (while (re-search-forward (concat "^[^][]*\\b" phrase "\\b.*?$") nil t)
-	(push (buffer-substring (match-beginning 0)
-				(match-end 0))
-	      definitions))
-      (setq dub/chinese-word-dict
-	   (if (equal (length definitions) 1)
-	       (car definitions)
-	     (helm-comp-read "Pick a definition: "
-			     definitions
-			     :nomark t))))))
-
-(defun dub/chinese-get-pronunciation (dictentry)
-  "Get a pronunciation from a dictionary entry."
-  (let ((pronunciation (save-match-data
-			 (and (string-match "\\[\\(.*?\\)\\]" dictentry)
-			      (match-string 1 dictentry)))))
-    (with-temp-buffer
-      (set-input-method "chinese-sisheng")
-      (mapconcat (lambda (x)
-		   (let ((translation (quail-map-definition
-					(quail-lookup-key x))))
-			  (or (if (listp translation)
-					(elt (cdr translation) 0)
-				(char-to-string translation)) ;sisheng doesn't have 5th tone
-			      (substring x 0 -1))))
-		 (split-string pronunciation " " t)
-		 " "))))
-
-(defun dub/chinese-get-definition (dictentry)
-  "Get a definition from a dictionary entry."
-  (save-match-data
-    (and (string-match "/\\(.*?\\)$" dictentry)
-	 (mapconcat 'identity
-		    (split-string (match-string 1 dictentry) "/" t)
-		    "\n"))))
-
-(defun dub/chinese-get-word (dictentry)
-  "Return either the character, or a list of traditional and simplified."
-  (let* ((words (save-match-data
-		  (and (string-match "^\\(.+?\\) \\(.+?\\)\\b" dictentry)
-		       (cons (match-string 1 dictentry)
-			     (match-string 2 dictentry)))))
-	 (traditional (car words))
-	 (simplified (cdr words)))
-    (if (equal traditional simplified)
-	(setq dub/chinese-words traditional)
-      (setq dub/chinese-words words)
-      (format "%s [%s]" simplified traditional))))
-
-(defun dub/chinese-def-at-point (&optional arg)
-  "Get the definition of a character at the point and display in
-the minibuffer. With an argument, insert the definition into the
-buffer."
-  (interactive "P")
-  (let ((phrase (if (use-region-p)
-		    (buffer-substring-no-properties (region-beginning) (region-end))
-		  (string (char-after))))
-	definitions)
-    (with-temp-buffer
-      (insert-file-contents dub/chinese-dictionary-path)
-      (while (re-search-forward (concat "^[^][]*\\b" phrase "\\b.*?$") nil t)
-	  (push (buffer-substring (match-beginning 0)
-				  (match-end 0))
-		definitions)))
-    (let ((defs (mapconcat 'identity definitions "\n")))
-	  (if arg
-	      (insert defs)
-	    (message defs)))))
-
-(global-set-key (kbd "<f9> C") 'dub/chinese-def-at-point)
-
-(defvar dub/chinese-decomposition-path
-  "~/Dropbox/org/chinese/cjk-decomp-0.4.0.txt"
-  "Where we store the Chinese character decomposition data")
-
-(defun dub/chinese-decomposition-find (phrase)
-  "Find a chinese word or phrase in the dictionary"
-  (defun str-decomp (strnum)
-    (if (and strnum (= (string-to-number strnum) 0))
-	strnum
-      (dub/chinese-decomposition-find strnum)))
-  (with-temp-buffer
-    (insert-file-contents dub/chinese-decomposition-path)
-    (let (definitions)
-      (when (re-search-forward (concat "^" phrase ":.*?$") nil t)
-	(let ((decomp (buffer-substring (match-beginning 0)
-					(match-end 0))))
-	  (save-match-data
-	    (string-match "^\\(.*?\\):\\(.*?\\)(\\(.*?\\))$" decomp)
-	    (let* ((decomptype (match-string 2 decomp))
-		   (constituents (split-string (match-string 3 decomp) "[,()]")))
-	      (cons decomptype (mapcar 'str-decomp constituents)))))))))
-
-(defun dub/chinese-decomposition-at-point ()
-  "Get the decomposition of a character at the point and insert it."
-  (interactive)
-  (defun listtostr (x)
-    (if (listp x)
-	(mapconcat 'listtostr x "")
-      x))
-  (let ((phrase (string (char-after))))
-    (insert (listtostr (dub/chinese-decomposition-find phrase)))))
-
-(global-set-key (kbd "<f9> E") 'dub/chinese-decomposition-at-point)
+           ("e" "Emacs idea/project" entry
+           (file+headline "~/Dropbox/org/emacs-ideas.org" "Ideas")
+           "* %?\n %T")))
 #+END_SRC
 
 * Unsorted
@@ -290,22 +180,12 @@ buffer."
 (use-package restclient)
 (use-package fish-mode)
 (use-package fill-column-indicator)
-(use-package elfeed)
+(use-package elfeed
+  :bind ("C-x w" . elfeed))
 (use-package exec-path-from-shell)  ;; if on Mac
-(use-package ido-completing-read+)
-(use-package smex)
 (use-package projectile)
-(use-package rainbow-delimiters)
-(use-package tagedit)
 (use-package neotree)
 (use-package json-mode)
-(use-package gruvbox-theme
-  :defer t
-  :init (load-theme 'gruvbox-dark-medium t))
-(use-package all-the-icons
-  :config (lambda ()  ;; workaround to only install fonts if not already installed
-            (unless (member "all-the-icons" (font-family-list))
-              (all-the-icons-install-fonts t))))
 
 ;; 2 space indent for shell scripts
 (setq sh-basic-offset 2)
@@ -314,14 +194,6 @@ buffer."
   (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-envs
    '("PATH")))
-
-;; Disable startup message
-(setq inhibit-startup-message t)
-
-;; Global line numbers
-(global-linum-mode t)
-
-(global-set-key (kbd "C-x w") 'elfeed)
 
 (setq elfeed-feeds
       '(("http://xkcd.com/rss.xml" comic)
@@ -334,11 +206,6 @@ buffer."
 	("http://news.mit.edu/rss/topic/computers" tech)
 	("https://news.ycombinator.com/rss" tech)))
 (setq-default elfeed-search-filter "@1-week-ago +unread")
-
-;; IDO mode
-(ido-mode t)
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
 
 ;; Set neotree theme
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
@@ -376,7 +243,4 @@ buffer."
   (when (ffip-current-full-filename-match-pattern-p "olympus")
     (add-to-list 'ffip-prune-patterns "*/env")))
 (add-hook 'prog-mode-hook 'my-setup-develop-environment)
-
-;; Make Emacs auto-indent on RET (rather than C-j alone)
-(define-key global-map (kbd "RET") 'newline-and-indent)
 #+END_SRC
