@@ -36,7 +36,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (gruvbox-theme dockerfile-mode yaml-mode use-package tagedit spacemacs-theme smex restclient rainbow-delimiters projectile org-plus-contrib neotree magit json-mode jedi ido-completing-read+ fish-mode fill-column-indicator exec-path-from-shell elpy elfeed doom-modeline diminish better-defaults auto-compile))))
+    (org-bullets gruvbox-theme dockerfile-mode yaml-mode use-package tagedit spacemacs-theme smex restclient rainbow-delimiters projectile org-plus-contrib neotree magit json-mode jedi ido-completing-read+ fish-mode fill-column-indicator exec-path-from-shell elpy elfeed doom-modeline diminish better-defaults auto-compile))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

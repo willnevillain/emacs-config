@@ -108,6 +108,11 @@ You can basically do everything from magit-status.
   :bind ("C-x g" . magit-status))
 #+END_SRC
 
+** Forge
+Interactions with GitHub
+#+BEGIN_SRC emacs-lisp
+(use-package forge)
+#+END_SRC
 ** Utility Functions
 *** Git blame
 #+BEGIN_SRC emacs-lisp
@@ -142,7 +147,8 @@ Base configuration.
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :bind (("C-c l" . org-store-link)
-         ("C-c a" . org-agenda)))
+         ("C-c a" . org-agenda))
+         ("C-c c" . org-capture))
 #+END_SRC
 
 I like to log when tasks were completed.
@@ -158,6 +164,12 @@ so this behooves me.
 (setq org-agenda-files '("~/Dropbox/org"))
 #+END_SRC
 
+** Org-bullets
+More readable.
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
 ** Capture Templates
 
 #+BEGIN_SRC emacs-lisp
@@ -170,77 +182,82 @@ so this behooves me.
            "* %?\n %T")))
 #+END_SRC
 
-* Unsorted
+* Development
+** Projectile
 #+BEGIN_SRC emacs-lisp
-(use-package better-defaults)
-(use-package elpy)
-(use-package jedi)
-(use-package yaml-mode)
-(use-package dockerfile-mode)
-(use-package restclient)
-(use-package fish-mode)
-(use-package fill-column-indicator)
-(use-package elfeed
-  :bind ("C-x w" . elfeed))
-(use-package exec-path-from-shell)  ;; if on Mac
 (use-package projectile)
-(use-package neotree)
+#+END_SRC
+** Python
+I use elpy for python
+#+BEGIN_SRC emacs-lisp
+(use-package elpy
+  :config 
+  (elpy-enable))
+#+END_SRC
+
+Treat things in snake_case as one word, only in Python mode
+#+BEGIN_SRC emacs-lisp
+(add-hook 'python-mode-hook 'superword-mode)
+#+END_SRC
+** Development adjacent
+*** Restclient
+This is a pretty cool package that I haven't dived into enough.
+#+BEGIN_SRC emacs-lisp
+(use-package restclient)
+#+END_SRC
+*** Fish Shell
+#+BEGIN_SRC emacs-lisp
+(use-package fish-mode)
+#+END_SRC
+*** Yaml Mode
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode)
+#+END_SRC
+*** JSON Mode
+#+BEGIN_SRC emacs-lisp
 (use-package json-mode)
-
-;; 2 space indent for shell scripts
-(setq sh-basic-offset 2)
-
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize)
-  (exec-path-from-shell-copy-envs
-   '("PATH")))
-
-(setq elfeed-feeds
+#+END_SRC
+*** Dockerfile Mode
+#+BEGIN_SRC emacs-lisp
+(use-package dockerfile-mode)
+#+END_SRC
+* Elfeed
+RSS feeds - should move the feed definitions to another file.
+#+BEGIN_SRC emacs-lisp
+(use-package elfeed
+  :bind ("C-x w" . elfeed)
+  :config
+  (setq elfeed-feeds
       '(("http://xkcd.com/rss.xml" comic)
 	("https://www.smbc-comics.com/rss.php" comic)
 	("http://reddit.com/r/emacs/.rss" emacs)
 	("http://planet.emacsen.org/atom.xml" emacs)
 	("http://pragmaticemacs.com/feed/" emacs)
-	("http://rss.slashdot.org/Slashdot/slashdotMain" tech)
-	("https://www.joelonsoftware.com/feed/" tech)
 	("http://news.mit.edu/rss/topic/computers" tech)
-	("https://news.ycombinator.com/rss" tech)))
-(setq-default elfeed-search-filter "@1-week-ago +unread")
-
-;; Set neotree theme
-(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-
-;; Enable elpy
-(elpy-enable)
-
-;; Treat things in snake_case as one word when we're in Python mode
-(add-hook 'python-mode-hook 'superword-mode)
-
-;; Fill column indicator config
-(setq fci-rule-column 100)
-(setq fci-rule-width 1)
-(setq fci-rule-color "purple")
-(add-hook 'python-mode-hook 'fci-mode)
-
-(defvar-local company-fci-mode-on-p nil)
-
-(defun company-turn-off-fci (&rest ignore)
-  (when (boundp 'fci-mode)
-    (setq company-fci-mode-on-p fci-mode)
-    (when fci-mode (fci-mode -1))))
-
-(defun company-maybe-turn-on-fci (&rest ignore)
-  (when company-fci-mode-on-p (fci-mode 1)))
-
-(add-hook 'company-completion-started-hook 'company-turn-off-fci)
-(add-hook 'company-completion-finished-hook 'company-maybe-turn-on-fci)
-(add-hook 'company-completion-cancelled-hook 'company-maybe-turn-on-fci)
-
-;; Project specific find-file configuration
-(defun my-setup-develop-environment ()
-  (interactive)
-  ;; When searching files in the olympus directory, ignore virtualenv dir
-  (when (ffip-current-full-filename-match-pattern-p "olympus")
-    (add-to-list 'ffip-prune-patterns "*/env")))
-(add-hook 'prog-mode-hook 'my-setup-develop-environment)
+	("https://news.ycombinator.com/rss" tech)
+        ("https://blog.jessfraz.com/index.xml" tech)))
+  (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
+* Neotree
+#+BEGIN_SRC emacs-lisp
+(use-package neotree
+  :config
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
+#+END_SRC
+* Misc Configuration
+** Better defaults
+#+BEGIN_SRC emacs-lisp
+(use-package better-defaults)
+#+END_SRC
+** exec-path-from-shell (OSX specific)
+#+BEGIN_SRC emacs-lisp
+(use-package exec-path-from-shell
+  :config
+  (when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-envs
+   '("PATH"))))
+#+END_SRC
+* Unsorted
+Empty!...for now.
+
