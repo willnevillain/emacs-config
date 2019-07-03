@@ -179,7 +179,7 @@ More readable.
            "* TODO %?\n %i\n %a")
            ("e" "Emacs idea/project" entry
            (file+headline "~/Dropbox/org/emacs-ideas.org" "Ideas")
-           "* %?\n %T")))
+           "* %?\n")))
 #+END_SRC
 
 * Development
