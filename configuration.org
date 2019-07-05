@@ -239,7 +239,7 @@ Search and run all tests for function name under point (by naming convention).
 This needs some cleaning up, esp as we pollute the default-directory, but it works for now.
 #+BEGIN_SRC emacs-lisp
 (defun run-pytest-for-word-at-point ()
-  (interactive)
+  (interactive)  ;; TODO add a test for if (thing-at-point 'word) is nil - run all tests in file
   (run-pytest-for-word (thing-at-point 'word)))
 
 (defun run-pytest-for-word (word)
