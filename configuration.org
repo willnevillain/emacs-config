@@ -164,6 +164,17 @@ so this behooves me.
 (setq org-agenda-files '("~/Dropbox/org"))
 #+END_SRC
 
+** Org-babel
+Load up the languages we want org-babel to be able to execute.
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ (quote org-babel-load-languages)
+ (quote ((emacs-lisp . t)
+         (python . t)
+         (shell . t)
+         (org . t))))
+#+END_SRC
+
 ** Org-bullets
 More readable.
 #+BEGIN_SRC emacs-lisp
@@ -201,12 +212,13 @@ Trying out Ivy / Counsel
         ("C-x C-f" . counsel-find-file)
         ("C-c g" . counsel-git)))
 #+END_SRC
-* Development** Projectile
+* Development
+** Projectile
 #+BEGIN_SRC emacs-lisp
 (use-package projectile)
 #+END_SRC
 ** Python
-I use elpy for python
+I currently use elpy for python
 #+BEGIN_SRC emacs-lisp
 (use-package elpy
   :config 
@@ -216,6 +228,38 @@ I use elpy for python
 Treat things in snake_case as one word, only in Python mode
 #+BEGIN_SRC emacs-lisp
 (add-hook 'python-mode-hook 'superword-mode)
+#+END_SRC
+*** Python utility functions
+
+These are idiomatic to my current work codebase,
+and invoke fabric commands to set environment correctly,
+but feel free to harvest any useful bits.
+
+Search and run all tests for function name under point (by naming convention).
+This needs some cleaning up, esp as we pollute the default-directory, but it works for now.
+#+BEGIN_SRC emacs-lisp
+(defun run-pytest-for-word-at-point ()
+  (interactive)
+  (run-pytest-for-word (thing-at-point 'word)))
+
+(defun run-pytest-for-word (word)
+  (setq default-directory  ;; need to search for tests from top-level dir of project
+        (shell-command-to-string "echo -n (git rev-parse --show-toplevel)"))
+  (let ((process
+         (start-process-shell-command "*pytest*" "*pytest*"
+                                      (concat  ;; trim any leading "_"s
+                                       (if (string-equal (substring word 0 1) "_")
+                                           "ftf test"
+                                         "ftf test_")
+                                       word))))
+    (with-current-buffer (process-buffer process)
+      (display-buffer (current-buffer))
+      (require 'shell)
+      (shell-mode)
+      (set-process-filter process 'comint-output-filter))))  ;; for handling ansi-colors
+
+(add-hook 'python-mode-hook
+          (lambda () (local-set-key (kbd "C-c t") 'run-pytest-for-word-at-point)))
 #+END_SRC
 ** Development adjacent
 *** Restclient
