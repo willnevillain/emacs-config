@@ -308,6 +308,12 @@ This is a pretty cool package that I haven't dived into enough.
 #+BEGIN_SRC emacs-lisp
 (use-package dockerfile-mode)
 #+END_SRC
+* Snippets
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :config (yas-global-mode 1))
+#+END_SRC
 * Elfeed
 RSS feeds - should move the feed definitions to another file.
 #+BEGIN_SRC emacs-lisp
@@ -320,8 +326,6 @@ RSS feeds - should move the feed definitions to another file.
 	("http://reddit.com/r/emacs/.rss" emacs)
 	("http://planet.emacsen.org/atom.xml" emacs)
 	("http://pragmaticemacs.com/feed/" emacs)
-	("http://news.mit.edu/rss/topic/computers" tech)
-	("https://news.ycombinator.com/rss" tech)
         ("https://blog.jessfraz.com/index.xml" tech)))
   (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC

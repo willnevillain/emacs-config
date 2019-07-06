@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: oly_unit
+# key: oly_unit
+# --
+from olympus.tests.base import UnitTest
+
+
+class Test$1(UnitTest):
+    $0

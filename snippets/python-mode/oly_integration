@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: oly_integration
+# key: oly_integration
+# --
+from olympus.tests.base import IntegrationTest
+
+
+class Test$1(IntegrationTest):
+    $0
