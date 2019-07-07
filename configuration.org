@@ -224,24 +224,24 @@ Presentation mode for org-mode
            "* %?\n")))
 #+END_SRC
 
-* Completion
-Trying out Ivy / Counsel
-** Ivy
+* Helm
 #+BEGIN_SRC emacs-lisp
-(use-package ivy
-  :diminish ivy-mode
+(use-package flx)
+(use-package helm-flx)
+(use-package helm
+  :demand
+  :diminish helm-mode
+  :bind (("M-x" . helm-M-x)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files))
   :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) "))
-#+END_SRC
-** Counsel
-#+BEGIN_SRC emacs-lisp
-(use-package counsel
-  :ensure t
-  :bind (("M-x" . counsel-M-x)
-        ("C-x C-f" . counsel-find-file)
-        ("C-c g" . counsel-git)))
+  (helm-mode 1)
+  (helm-flx-mode +1)
+  (setq helm-M-x-fuzzy-match t)
+  (setq helm-locate-fuzzy-match t)
+  (setq helm-lisp-fuzzy-completion t)
+  (setq helm-buffer-max-length 30))
 #+END_SRC
 * Development
 ** Projectile
@@ -361,6 +361,23 @@ Don't like to pollute the file tree with backups if I don't have to.
 #+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+END_SRC
+** Eshell here
+Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#eshell-here][Adrien]] for this one.
+ #+BEGIN_SRC emacs-lisp
+ (defun eshell-here ()
+  "Opens up a new shell in the directory associated with the
+    current buffer's file. The eshell is renamed to match that
+    directory to make multiple eshell windows easier."
+  (interactive)
+  (let* ((height (/ (window-total-height) 3)))
+    (split-window-vertically (- height))
+    (other-window 1)
+    (eshell "new")
+    (insert (concat "ls"))
+    (eshell-send-input)))
+
+(bind-key "C-!" 'eshell-here)
+ #+END_SRC
 * Unsorted
 Empty!...for now.
 
