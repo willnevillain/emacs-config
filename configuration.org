@@ -70,6 +70,12 @@ Trying out tomorrow-eighties
   (color-theme-sanityinc-tomorrow-eighties))
 #+END_SRC
 
+Some customize changes for tomorrow-eighties
+#+BEGIN_SRC emacs-lisp
+(custom-set-faces
+ '(org-block ((t (:inherit shadow :background "gray20")))))
+#+END_SRC
+
 But keep gruvbox around in case I grow weary of tomorrow-eighties
 #+BEGIN_SRC emacs-lisp
 (use-package gruvbox-theme
@@ -243,13 +249,14 @@ Trying out Ivy / Counsel
 (use-package projectile)
 #+END_SRC
 ** Python
-I currently use elpy for python
+Using elpy currently - would like to move to using MS Python LSP, but it's not mature enough yet.
 #+BEGIN_SRC emacs-lisp
 (use-package elpy
-  :config 
+  :config
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "-i --simple-prompt")
   (elpy-enable))
 #+END_SRC
-
 Treat things in snake_case as one word, only in Python mode
 #+BEGIN_SRC emacs-lisp
 (add-hook 'python-mode-hook 'superword-mode)
@@ -348,6 +355,11 @@ RSS feeds - should move the feed definitions to another file.
   (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-envs
    '("PATH"))))
+#+END_SRC
+** Backups in one folder
+Don't like to pollute the file tree with backups if I don't have to.
+#+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+END_SRC
 * Unsorted
 Empty!...for now.
