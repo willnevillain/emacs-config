@@ -82,6 +82,21 @@ But keep gruvbox around in case I grow weary of tomorrow-eighties
   :defer t)
   ;; :config (load-theme 'gruvbox-dark-medium t)
 #+END_SRC
+*** Font
+
+Use Hack font if installed.
+
+#+BEGIN_SRC emacs-lisp
+(if (condition-case nil
+        (x-list-fonts "Hack")
+      (error nil))
+    (progn
+      (add-to-list 'default-frame-alist '(font . "Hack-12"))
+      (set-face-attribute 'default nil :font "Hack-12")))
+#+END_SRC
+
+#+RESULTS:
+
 *** Nyan-mode
 What would I even be doing with my life without this.
 #+BEGIN_SRC emacs-lisp
@@ -207,11 +222,24 @@ I like to include images in my org files - this allows drag-n-drop as well as do
 #+BEGIN_SRC emacs-lisp
 (use-package org-download)
 #+END_SRC
-** Epresent
-Presentation mode for org-mode
+** Presentation modes
+Epresent is a presentation mode for org-mode
 #+BEGIN_SRC emacs-lisp
 (use-package epresent)
 #+END_SRC
+
+Also trying out org-present
+#+BEGIN_SRC emacs-lisp
+(use-package org-present
+  :hook (
+         (org-present-mode . 
+           (lambda () 
+             (org-display-inline-images)))
+         (org-present-mode-quit .
+           (lambda ()
+             (org-remove-inline-images)))))
+#+END_SRC
+
 ** Capture Templates
 
 #+BEGIN_SRC emacs-lisp
@@ -315,6 +343,12 @@ This is a pretty cool package that I haven't dived into enough.
 #+BEGIN_SRC emacs-lisp
 (use-package dockerfile-mode)
 #+END_SRC
+*** CSV Mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package csv-mode)
+#+END_SRC
+
 * Snippets
 #+BEGIN_SRC emacs-lisp
 (use-package yasnippet
