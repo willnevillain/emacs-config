@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: oly_model
+# key: oly_model
+# --
+import sqlalchemy as sa
+
+from olympus.models.base import Base
+
+
+class $1(Base):
+    """$2"""
+
+    $0

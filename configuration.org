@@ -200,6 +200,15 @@ so this behooves me.
 (setq org-agenda-files '("~/Dropbox/org"))
 #+END_SRC
 
+Add some more states for todos.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w@/!)""DONE(d!)")))
+(setq org-todo-keyword-faces
+           '(("WAIT" . "yellow")))
+#+END_SRC
+
 ** Org-babel
 Load up the languages we want org-babel to be able to execute.
 #+BEGIN_SRC emacs-lisp
@@ -285,9 +294,13 @@ Using elpy currently - would like to move to using MS Python LSP, but it's not m
         python-shell-interpreter-args "-i --simple-prompt")
   (elpy-enable))
 #+END_SRC
-Treat things in snake_case as one word, only in Python mode
+I only use Company with elpy right now, so some quality of life fixes here.
+Reduce delay to show, minimum prefix when to show suggestions, wrap around to top of list at bottom, and allow tab to cycle through suggestions.
 #+BEGIN_SRC emacs-lisp
-(add-hook 'python-mode-hook 'superword-mode)
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1)
+  (setq company-selection-wrap-around t)
+  (company-tng-configure-default)
 #+END_SRC
 *** Python utility functions
 
