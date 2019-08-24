@@ -55,11 +55,10 @@ I only use GUI emacs - these are baseline modifications.
 #+BEGIN_SRC emacs-lisp
 (setq inhibit-startup-message t)
 #+END_SRC
-*** Global line numbers
+*** Column number mode
 #+BEGIN_SRC emacs-lisp
-(global-linum-mode t)
+(setq column-number-mode t)
 #+END_SRC
-*** 
 ** UI
 *** Theme
 Trying out tomorrow-eighties
@@ -95,14 +94,6 @@ Use Hack font if installed.
       (set-face-attribute 'default nil :font "Hack-12")))
 #+END_SRC
 
-#+RESULTS:
-
-*** Nyan-mode
-What would I even be doing with my life without this.
-#+BEGIN_SRC emacs-lisp
-(use-package nyan-mode
-  :config (nyan-mode))
-#+END_SRC
 *** All the icons!
 all-the-icons makes neotree look cooler. Workaround to install fonts if not already installed.
 #+BEGIN_SRC emacs-lisp
@@ -144,11 +135,6 @@ You can basically do everything from magit-status.
   :bind ("C-x g" . magit-status))
 #+END_SRC
 
-** Forge
-Interactions with GitHub
-#+BEGIN_SRC emacs-lisp
-(use-package forge)
-#+END_SRC
 ** Utility Functions
 *** Git blame
 #+BEGIN_SRC emacs-lisp
@@ -300,7 +286,6 @@ Reduce delay to show, minimum prefix when to show suggestions, wrap around to to
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
-  (company-tng-configure-default)
 #+END_SRC
 *** Python utility functions
 
