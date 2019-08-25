@@ -269,24 +269,43 @@ Also trying out org-present
 * Development
 ** Projectile
 #+BEGIN_SRC emacs-lisp
-(use-package projectile)
-#+END_SRC
-** Python
-Using elpy currently - would like to move to using MS Python LSP, but it's not mature enough yet.
-#+BEGIN_SRC emacs-lisp
-(use-package elpy
+(use-package ag)
+(use-package helm-ag)
+(use-package projectile
   :config
-  (setq python-shell-interpreter "ipython"
-        python-shell-interpreter-args "-i --simple-prompt")
-  (elpy-enable))
+  (projectile-mode)
+  (setq-default projectile-mode-line
+   '(:eval
+     (if (file-remote-p default-directory)
+         " Proj"
+       (format " Proj[%s]" (projectile-project-name)))))
+  (add-to-list 'projectile-globally-ignored-directories "node_modules"))
+(use-package helm-projectile
+  :bind (("C-c v" . helm-projectile)
+         ("C-c C-v" . helm-projectile-ag)
+         ("C-c w" . helm-projectile-switch-project)))
 #+END_SRC
-I only use Company with elpy right now, so some quality of life fixes here.
-Reduce delay to show, minimum prefix when to show suggestions, wrap around to top of list at bottom, and allow tab to cycle through suggestions.
+** Company
+Company-mode quality of life fixes
 #+BEGIN_SRC emacs-lisp
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
 #+END_SRC
+
+** Python
+Trying out lsp, but keeping elpy config around just in case
+#+BEGIN_SRC emacs-lisp
+  ;;(use-package elpy
+  ;;  :config
+  ;;  (setq python-shell-interpreter "ipython"
+  ;;        python-shell-interpreter-args "-i --simple-prompt")
+  ;;  (elpy-enable))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(use-package pyvenv)
+#+END_SRC
+
 *** Python utility functions
 
 These are idiomatic to my current work codebase,
@@ -319,6 +338,76 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 (add-hook 'python-mode-hook
           (lambda () (local-set-key (kbd "C-c t") 'run-pytest-for-word-at-point)))
 #+END_SRC
+** JavaScript / TypeScript
+#+BEGIN_SRC emacs-lisp
+(use-package js2-mode)
+(use-package rjsx-mode)
+(use-package npm-mode
+  :defer t
+  :hook
+  (js2-mode-hook . npm-mode)
+  (rjsx-mode-hook . npm-mode))
+#+END_SRC
+** LSP
+#+BEGIN_SRC emacs-lisp
+    (use-package lsp-mode
+      :ensure t
+      :config
+      (require 'lsp-clients)
+
+      ;; lsp extras
+      (use-package lsp-ui
+        :ensure t
+        :config
+        (setq lsp-ui-sideline-ignore-duplicate t)
+        (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+      (use-package company-lsp
+        :config
+        (push 'company-lsp company-backends))
+
+      (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+
+      (add-hook 'typescript-mode-hook 'lsp)
+      (add-hook 'js2-mode-hook 'lsp)
+      (add-hook 'css-mode 'lsp)
+      (add-hook 'html-mode 'lsp)
+      (add-hook 'python-mode-hook 'lsp)
+    
+      (setq lsp-language-id-configuration 
+       '(
+         (python-mode . "python")
+         (css-mode . "css")
+         (web-mode . "html")
+         (html-mode . "html")
+         (mhtml-mode . "html")
+         (js2-mode . "javascript")
+         (typescript-mode . "typescript")))
+
+      ;; NB: only required if you prefer flake8 instead of the default
+      ;; send pyls config via lsp-after-initialize-hook -- harmless for
+      ;; other servers due to pyls key, but would prefer only sending this
+      ;; when pyls gets initialised (:initialize function in
+      ;; lsp-define-stdio-client is invoked too early (before server
+      ;; start)) -- cpbotha
+      (defun lsp-set-cfg ()
+        (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
+          ;; TODO: check lsp--cur-workspace here to decide per server / project
+          (lsp--set-configuration lsp-cfg)))
+
+      (add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
+
+      )
+
+  ;; LSP debugging
+  ;;(setq lsp-print-io t)
+  ;;(setq lsp-trace t)
+  ;;(setq lsp-print-performance t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
 ** Development adjacent
 *** Restclient
 This is a pretty cool package that I haven't dived into enough.
@@ -340,11 +429,6 @@ This is a pretty cool package that I haven't dived into enough.
 *** Dockerfile Mode
 #+BEGIN_SRC emacs-lisp
 (use-package dockerfile-mode)
-#+END_SRC
-*** CSV Mode
-
-#+BEGIN_SRC emacs-lisp
-(use-package csv-mode)
 #+END_SRC
 
 * Snippets
