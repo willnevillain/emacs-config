@@ -269,24 +269,34 @@ Also trying out org-present
 #+END_SRC
 
 * Development
+
+We want spaces, not tabs.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
 ** Projectile
 #+BEGIN_SRC emacs-lisp
-(use-package ag)
-(use-package helm-ag)
-(use-package projectile
-  :config
-  (projectile-mode)
-  (setq-default projectile-mode-line
-   '(:eval
-     (if (file-remote-p default-directory)
-         " Proj"
-       (format " Proj[%s]" (projectile-project-name)))))
-  (add-to-list 'projectile-globally-ignored-directories "node_modules"))
-(use-package helm-projectile
-  :bind (("C-c v" . helm-projectile)
-         ("C-c C-v" . helm-projectile-ag)
-         ("C-c w" . helm-projectile-switch-project)))
+  (use-package ag)
+  (use-package helm-ag)
+  (use-package projectile
+    :config
+    (projectile-mode)
+    (setq-default projectile-mode-line
+     '(:eval
+       (if (file-remote-p default-directory)
+           " Proj"
+         (format " Proj[%s]" (projectile-project-name)))))
+    (add-to-list 'projectile-globally-ignored-directories "node_modules"))
+  (use-package helm-projectile
+    :bind (("C-c v" . helm-projectile)
+           ("C-c f" . helm-projectile-find-file)
+           ("C-c b" . helm-projectile-switch-to-buffer)
+           ("C-c C-v" . helm-projectile-ag)
+           ("C-c w" . helm-projectile-switch-project)))
 #+END_SRC
+
 ** Company
 Company-mode quality of life fixes
 #+BEGIN_SRC emacs-lisp
@@ -342,7 +352,9 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 #+END_SRC
 ** JavaScript / TypeScript
 #+BEGIN_SRC emacs-lisp
-(use-package js2-mode)
+(use-package js2-mode
+  :config
+  (setq-default js2-basic-offset 2))
 (use-package rjsx-mode)
 (use-package npm-mode
   :defer t
@@ -350,6 +362,7 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
   (js2-mode-hook . npm-mode)
   (rjsx-mode-hook . npm-mode))
 #+END_SRC
+
 ** LSP
 #+BEGIN_SRC emacs-lisp
       (use-package lsp-mode
