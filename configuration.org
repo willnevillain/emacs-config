@@ -303,6 +303,38 @@ Company-mode quality of life fixes
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
+  (global-company-mode)
+#+END_SRC
+
+** Clojure (Lisp)
+
+Can't do much without a major mode.
+#+BEGIN_SRC emacs-lisp
+  (use-package clojure-mode)
+#+END_SRC
+
+We definitely want CIDER, this is the bread and butter.
+#+BEGIN_SRC emacs-lisp
+  (use-package cider)
+#+END_SRC
+
+Company hooks to enable fuzzy completion when in minor mode cider-mode.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+  (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
+#+END_SRC
+
+** Paredit
+#+BEGIN_SRC emacs-lisp
+  (use-package paredit
+    :hook ((clojure-mode . paredit-mode)
+           (cider-mode . paredit-mode)))
+#+END_SRC
+
+** RainbowDelimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
 ** Python
