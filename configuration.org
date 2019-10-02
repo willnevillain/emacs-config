@@ -30,6 +30,19 @@ Always compile packages, and use the newest version available.
   (setq load-prefer-newer t)
 #+END_SRC
 
+* Benchmarking
+
+Benchmarking Emacs startup. We want to include this as early as possible in this config.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package benchmark-init
+    :ensure t
+    :config
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
+#+END_SRC
+
+Can get results on startup with =benchmark-init/show-durations-tabulated=
+
 * UI/UX
 I only use GUI emacs - these are baseline modifications.
 ** Windows, Frames and Buffers
@@ -198,7 +211,7 @@ Add some more states for todos.
 
 ** Exporting
 #+BEGIN_SRC emacs-lisp
-  (use-package ox-md)
+  (require 'ox-md)
 #+END_SRC
 
 ** Org-babel
@@ -218,29 +231,6 @@ More readable.
 (use-package org-bullets
   :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
-** Org-download
-I like to include images in my org files - this allows drag-n-drop as well as do screenshots. Be wary that images tend to be...large.
-#+BEGIN_SRC emacs-lisp
-(use-package org-download)
-#+END_SRC
-** Presentation modes
-Epresent is a presentation mode for org-mode
-#+BEGIN_SRC emacs-lisp
-(use-package epresent)
-#+END_SRC
-
-Also trying out org-present
-#+BEGIN_SRC emacs-lisp
-(use-package org-present
-  :hook (
-         (org-present-mode . 
-           (lambda () 
-             (org-display-inline-images)))
-         (org-present-mode-quit .
-           (lambda ()
-             (org-remove-inline-images)))))
-#+END_SRC
-
 ** Capture Templates
 
 #+BEGIN_SRC emacs-lisp
@@ -298,6 +288,7 @@ We want spaces, not tabs.
   (use-package ag)
   (use-package helm-ag)
   (use-package projectile
+    :diminish projectile-mode
     :config
     (projectile-mode)
     (setq-default projectile-mode-line
@@ -344,6 +335,7 @@ Company hooks to enable fuzzy completion when in minor mode cider-mode.
 ** Paredit
 #+BEGIN_SRC emacs-lisp
   (use-package paredit
+    :diminish paredit-mode
     :hook ((clojure-mode . paredit-mode)
            (cider-mode . paredit-mode)))
 #+END_SRC
@@ -401,15 +393,17 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 #+END_SRC
 ** JavaScript / TypeScript
 #+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-  :config
-  (setq-default js2-basic-offset 2))
-(use-package rjsx-mode)
-(use-package npm-mode
-  :defer t
-  :hook
-  (js2-mode-hook . npm-mode)
-  (rjsx-mode-hook . npm-mode))
+  (use-package js2-mode
+    :defer t
+    :config
+    (setq-default js2-basic-offset 2))
+  (use-package rjsx-mode
+    :defer t)
+  (use-package npm-mode
+    :defer t
+    :hook
+    (js2-mode-hook . npm-mode)
+    (rjsx-mode-hook . npm-mode))
 #+END_SRC
 
 ** LSP
@@ -474,10 +468,21 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 
 ** Development adjacent
 *** Restclient
-This is a pretty cool package that I haven't dived into enough.
+
+This is a pretty cool package that I haven't dived into enough, hoping to use is as a postman replacement.
+
 #+BEGIN_SRC emacs-lisp
 (use-package restclient)
 #+END_SRC
+
+Let's add a dash of company to that.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-restclient
+    :config (add-to-list 'company-backends 'company-restclient))
+#+END_SRC
+
+
 *** Fish Shell
 #+BEGIN_SRC emacs-lisp
 (use-package fish-mode)
@@ -516,12 +521,6 @@ RSS feeds - should move the feed definitions to another file.
         ("https://blog.jessfraz.com/index.xml" tech)))
   (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
-* Neotree
-#+BEGIN_SRC emacs-lisp
-(use-package neotree
-  :config
-  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
-#+END_SRC
 * Misc Configuration
 ** Better defaults
 #+BEGIN_SRC emacs-lisp
@@ -558,6 +557,10 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
 
 (bind-key "C-!" 'eshell-here)
  #+END_SRC
+** Generic diminishes
+#+BEGIN_SRC emacs-lisp
+  ;; TODO fill this in with mode diminshes as appropriate, modeline is getting crowded
+#+END_SRC
 * Unsorted
 Empty!...for now.
 
