@@ -211,7 +211,9 @@ Add some more states for todos.
 
 ** Exporting
 #+BEGIN_SRC emacs-lisp
-  (require 'ox-md)
+  (use-package ox-md
+    :ensure nil
+    :defer t)
 #+END_SRC
 
 ** Org-babel
@@ -311,6 +313,7 @@ Company-mode quality of life fixes
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
+  (setq company-global-modes '(not org-mode))
   (global-company-mode)
 #+END_SRC
 
