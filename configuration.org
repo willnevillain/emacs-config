@@ -9,6 +9,7 @@ Almost all of this lifted from other, more sophisticated Emacs users. Those of
 note linked below:
 [[https://github.com/abrochard/emacs-config][abrochard]]
 [[https://github.com/hrs/dotfiles/tree/master/emacs/.emacs.d][hrs]]
+[[https://jamiecollinson.com/blog/my-emacs-config/][jamie collinson]]
 
 * Configure =use-package=
 
@@ -327,22 +328,11 @@ We want spaces, not tabs.
 
         (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 
-        (add-hook 'typescript-mode-hook 'lsp)
-        (add-hook 'js2-mode-hook 'lsp)
-        (add-hook 'css-mode 'lsp)
-        (add-hook 'mhtml-mode 'lsp)
-        (add-hook 'html-mode 'lsp)
         (add-hook 'python-mode-hook 'lsp)
     
         (setq lsp-language-id-configuration 
          '(
-           (python-mode . "python")
-           (css-mode . "css")
-           (web-mode . "html")
-           (html-mode . "html")
-           (mhtml-mode . "html")
-           (js2-mode . "javascript")
-           (typescript-mode . "typescript")))
+           (python-mode . "python")))
 
         ;; NB: only required if you prefer flake8 instead of the default
         ;; send pyls config via lsp-after-initialize-hook -- harmless for
@@ -408,6 +398,8 @@ Trying out lsp, but keeping elpy config around just in case
   ;;        python-shell-interpreter-args "-i --simple-prompt")
   ;;  (elpy-enable))
 #+END_SRC
+
+Need to use =pyvenv= to activate the relevant virtualenv for your project.
 #+BEGIN_SRC emacs-lisp
 (use-package pyvenv)
 #+END_SRC
