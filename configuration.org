@@ -472,6 +472,8 @@ Utility function (hooked into flycheck) to use local eslint when present.
   (use-package web-mode
     :mode "\\.html\\'"
     :config
+    (setq web-mode-enable-auto-pairing t)
+    (setq web-mode-enable-css-colorization t)
     (setq web-mode-markup-indent-offset 2))
 #+END_SRC
 
@@ -560,11 +562,19 @@ Let's add a dash of company to that.
 #+END_SRC
 
 * Snippets
+
+Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community library]], which are saved in =~/.emacs.d/yasnippet-snippets=. My snippets are in =~/.emacs.d/snippets=.
+
 #+BEGIN_SRC emacs-lisp
-(use-package yasnippet
-  :diminish yas-minor-mode
-  :config (yas-global-mode 1))
+  (use-package yasnippet
+    :diminish yas-minor-mode
+    :config
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+    (yas-global-mode)
+    (global-set-key (kbd "M-/") 'company-yasnippet))
 #+END_SRC
+
 * Elfeed
 RSS feeds - should move the feed definitions to another file.
 #+BEGIN_SRC emacs-lisp
