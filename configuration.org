@@ -354,38 +354,6 @@ We want spaces, not tabs.
         )
 #+END_SRC
 
-** Clojure (Lisp)
-
-Can't do much without a major mode.
-#+BEGIN_SRC emacs-lisp
-  (use-package clojure-mode)
-#+END_SRC
-
-We definitely want CIDER, this is the bread and butter.
-#+BEGIN_SRC emacs-lisp
-  (use-package cider)
-#+END_SRC
-
-Company hooks to enable fuzzy completion when in minor mode cider-mode.
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
-  (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-#+END_SRC
-
-** Paredit
-#+BEGIN_SRC emacs-lisp
-  (use-package paredit
-    :diminish paredit-mode
-    :hook ((clojure-mode . paredit-mode)
-           (cider-mode . paredit-mode)))
-#+END_SRC
-
-** RainbowDelimiters
-#+BEGIN_SRC emacs-lisp
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
-
 ** Python
 Trying out lsp, but keeping elpy config around just in case
 #+BEGIN_SRC emacs-lisp
@@ -439,7 +407,7 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
     :defer t
-    :mode "\\.js\\"
+    :mode "\\.js\\'"
     :config
     (setq-default js2-indent-level 2)
     (setq-default js2-ignored-warnings '("msg.extra.trailing.comma")))
@@ -499,6 +467,54 @@ Utility function (hooked into flycheck) to use local eslint when present.
           (setq-local flycheck-javascript-eslint-executable eslint))))
 #+END_SRC
 
+=web-mode= for html/css.
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :mode "\\.html\\'"
+    :config
+    (setq web-mode-markup-indent-offset 2))
+#+END_SRC
+
+=web-beautify= for prettifying html/css by leveraging =js-beautify= - install this with =npm install -g js-beautify=.
+#+BEGIN_SRC emacs-lisp
+  (use-package web-beautify
+    :bind (:map web-mode-map
+                ("C-c b" . web-beautify-html)
+                :map js2-mode-map
+                ("C-c b" . web-beautify-js)))
+#+END_SRC
+
+** Clojure (Lisp)
+
+Can't do much without a major mode.
+#+BEGIN_SRC emacs-lisp
+  (use-package clojure-mode)
+#+END_SRC
+
+We definitely want CIDER, this is the bread and butter.
+#+BEGIN_SRC emacs-lisp
+  (use-package cider)
+#+END_SRC
+
+Company hooks to enable fuzzy completion when in minor mode cider-mode.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+  (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
+#+END_SRC
+
+** Paredit
+#+BEGIN_SRC emacs-lisp
+  (use-package paredit
+    :diminish paredit-mode
+    :hook ((clojure-mode . paredit-mode)
+           (cider-mode . paredit-mode)))
+#+END_SRC
+
+** RainbowDelimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
 ** Company
 Company-mode quality of life fixes
 #+BEGIN_SRC emacs-lisp
