@@ -354,9 +354,6 @@ We want spaces, not tabs.
         )
 #+END_SRC
 
-#+RESULTS:
-: t
-
 ** Clojure (Lisp)
 
 Can't do much without a major mode.
@@ -436,19 +433,70 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
   (add-hook 'python-mode-hook
             (lambda () (local-set-key (kbd "C-c t") 'run-pytest-for-word-at-point)))
 #+END_SRC
-** JavaScript / TypeScript
+** JavaScript / Web
+
+=js2-mode= is 1 better than build in JS Mode.
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
     :defer t
+    :mode "\\.js\\"
     :config
-    (setq-default js2-basic-offset 2))
+    (setq-default js2-indent-level 2)
+    (setq-default js2-ignored-warnings '("msg.extra.trailing.comma")))
+#+END_SRC
+
+=js2-refactor= for some additional refactoring options on top of =js2-mode=.
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-refactor
+    :defer t
+    :config
+    (js2r-add-keybindings-with-prefix "C-c C-m")
+    :hook
+    (js2-mode-hook . js2-refactor-mode))
+#+END_SRC
+
+=rjsx-mode= for working with JSX.
+#+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode
     :defer t)
+#+END_SRC
+
+=prettier-js= for autoformatting of JS.
+#+BEGIN_SRC emacs-lisp
+  (use-package prettier-js
+    :defer t
+    :config
+    (setq prettier-js-args '(
+                             "--trailing-comma" "es5"
+                             "--single-quote" "true"
+                             "--print-width" "100"
+                             ))
+    :hook
+    (js2-mode-hook . prettier-js-mode)
+    (rjsx-mode-hook . prettier-js-mode))
+#+END_SRC
+
+=npm-mode= is a really nifty little package. Command map [[https://github.com/mojochao/npm-mode#command-keymap][here]].
+#+BEGIN_SRC emacs-lisp
   (use-package npm-mode
     :defer t
     :hook
     (js2-mode-hook . npm-mode)
     (rjsx-mode-hook . npm-mode))
+#+END_SRC
+
+Utility function (hooked into flycheck) to use local eslint when present.
+#+BEGIN_SRC emacs-lisp
+  (defun dub/use-eslint-from-node-modules ()
+      "Set local eslint if available. Credit: jamiecollinson.com/blog/my-emacs-config/#javascript"
+      (let* ((root (locate-dominating-file
+                    (or (buffer-file-name) default-directory)
+                    "node_modules"))
+             (eslint (and root
+                          (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                            root))))
+        (when (and eslint (file-executable-p eslint))
+          (setq-local flycheck-javascript-eslint-executable eslint))))
 #+END_SRC
 
 ** Company
