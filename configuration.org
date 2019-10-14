@@ -409,7 +409,7 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
     :defer t
     :mode "\\.js\\'"
     :config
-    (setq-default js2-indent-level 2)
+    (setq-default js-indent-level 2)
     (setq-default js2-ignored-warnings '("msg.extra.trailing.comma")))
 #+END_SRC
 
@@ -418,53 +418,15 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
   (use-package js2-refactor
     :defer t
     :config
-    (js2r-add-keybindings-with-prefix "C-c C-m")
+    (js2r-add-keybindings-with-prefix "C-c C-r")
     :hook
-    (js2-mode-hook . js2-refactor-mode))
+    (js2-mode . js2-refactor-mode))
 #+END_SRC
 
 =rjsx-mode= for working with JSX.
 #+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode
     :defer t)
-#+END_SRC
-
-=prettier-js= for autoformatting of JS.
-#+BEGIN_SRC emacs-lisp
-  (use-package prettier-js
-    :defer t
-    :config
-    (setq prettier-js-args '(
-                             "--trailing-comma" "es5"
-                             "--single-quote" "true"
-                             "--print-width" "100"
-                             ))
-    :hook
-    (js2-mode-hook . prettier-js-mode)
-    (rjsx-mode-hook . prettier-js-mode))
-#+END_SRC
-
-=npm-mode= is a really nifty little package. Command map [[https://github.com/mojochao/npm-mode#command-keymap][here]].
-#+BEGIN_SRC emacs-lisp
-  (use-package npm-mode
-    :defer t
-    :hook
-    (js2-mode-hook . npm-mode)
-    (rjsx-mode-hook . npm-mode))
-#+END_SRC
-
-Utility function (hooked into flycheck) to use local eslint when present.
-#+BEGIN_SRC emacs-lisp
-  (defun dub/use-eslint-from-node-modules ()
-      "Set local eslint if available. Credit: jamiecollinson.com/blog/my-emacs-config/#javascript"
-      (let* ((root (locate-dominating-file
-                    (or (buffer-file-name) default-directory)
-                    "node_modules"))
-             (eslint (and root
-                          (expand-file-name "node_modules/eslint/bin/eslint.js"
-                                            root))))
-        (when (and eslint (file-executable-p eslint))
-          (setq-local flycheck-javascript-eslint-executable eslint))))
 #+END_SRC
 
 =web-mode= for html/css.
@@ -484,6 +446,44 @@ Utility function (hooked into flycheck) to use local eslint when present.
                 ("C-c b" . web-beautify-html)
                 :map js2-mode-map
                 ("C-c b" . web-beautify-js)))
+#+END_SRC
+
+=prettier-js= for autoformatting of JS. Need to have =prettier= installed on host via your package manager.
+#+BEGIN_SRC emacs-lisp
+  (use-package prettier-js
+    :defer t
+    :config
+    (setq prettier-js-args '(
+                             "--trailing-comma" "es5"
+                             "--single-quote" "true"
+                             "--print-width" "100"
+                             ))
+    :hook
+    (js2-mode. prettier-js-mode)
+    (rjsx-mode . prettier-js-mode))
+#+END_SRC
+
+=npm-mode= is a really nifty little package. Command map [[https://github.com/mojochao/npm-mode#command-keymap][here]].
+#+BEGIN_SRC emacs-lisp
+  (use-package npm-mode
+    :defer t
+    :hook
+    (js2-mode . npm-mode)
+    (rjsx-mode . npm-mode))
+#+END_SRC
+
+Utility function (hooked into flycheck) to use local eslint when present.
+#+BEGIN_SRC emacs-lisp
+  (defun dub/use-eslint-from-node-modules ()
+      "Set local eslint if available. Credit: jamiecollinson.com/blog/my-emacs-config/#javascript"
+      (let* ((root (locate-dominating-file
+                    (or (buffer-file-name) default-directory)
+                    "node_modules"))
+             (eslint (and root
+                          (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                            root))))
+        (when (and eslint (file-executable-p eslint))
+          (setq-local flycheck-javascript-eslint-executable eslint))))
 #+END_SRC
 
 ** Clojure (Lisp)
