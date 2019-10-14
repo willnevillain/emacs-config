@@ -1,0 +1,4 @@
+*.el text
+*.org text
+yasnippet-snippets/* linguist-vendored
+snippets/* linguist-vendored
