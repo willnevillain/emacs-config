@@ -375,6 +375,18 @@ These are idiomatic to my current work codebase,
 and invoke fabric commands to set environment correctly,
 but feel free to harvest any useful bits.
 
+THE MOST IMPORTANT ONE: for some reason, even after activating a virtualenv with =pyvenv-activate=, each time I visit a new Python file in the project, a new LSP process will spawn.
+This leaves me with something on the order of 40-50 processes before it eventually stops working, raising a generic "Too many open files" LSP OSError.
+I start off my work flow by calling the below function to set my virtualenv and the VIRTUALENV environment variable for the relevant work project.
+#+BEGIN_SRC emacs-lisp
+  (defvar olympus-env-dir "/Users/will/code/olympus/env")
+
+  (defun olympus-activate ()
+    (interactive)
+    (pyvenv-activate olympus-env-dir)
+    (setenv "VIRTUALENV" olympus-env-dir))
+#+END_SRC
+
 Search and run all tests for function name under point (by naming convention).
 This needs some cleaning up, esp as we pollute the default-directory, but it works for now.
 #+BEGIN_SRC emacs-lisp
