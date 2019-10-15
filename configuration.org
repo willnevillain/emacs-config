@@ -278,6 +278,12 @@ More readable.
     (setq helm-buffer-max-length 48))
 #+END_SRC
 
+* Ivy
+https://github.com/abo-abo/swiper
+http://oremacs.com/swiper/#key-bindings
+https://github.com/emacs-lsp/lsp-ivy
+https://github.com/ericdanan/counsel-projectile
+
 * Development
 
 We want spaces, not tabs.
@@ -309,49 +315,47 @@ We want spaces, not tabs.
 #+END_SRC
 
 ** LSP
+
+Configure LSP - I only use it for Python, currently.
 #+BEGIN_SRC emacs-lisp
-      (use-package lsp-mode
-        :ensure t
-        :config
-        (require 'lsp-clients)
+  (use-package lsp-mode
+    :config
+    (require 'lsp-clients)
 
-        ;; lsp extras
-        (use-package lsp-ui
-          :ensure t
-          :config
-          (setq lsp-ui-sideline-ignore-duplicate t)
-          (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+    (use-package lsp-ui
+      :config
+      (setq lsp-ui-sideline-ignore-duplicate t)
+      (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
-        (use-package company-lsp
-          :config
-          (push 'company-lsp company-backends))
+    (use-package company-lsp
+      :config
+      (push 'company-lsp company-backends))
 
-        (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+    (use-package helm-lsp
+      :commands helm-lsp-workspace-symbol)
 
-        (add-hook 'python-mode-hook 'lsp)
-    
-        (setq lsp-language-id-configuration 
-         '(
-           (python-mode . "python")))
+    (add-hook 'python-mode-hook 'lsp)
 
-        ;; NB: only required if you prefer flake8 instead of the default
-        ;; send pyls config via lsp-after-initialize-hook -- harmless for
-        ;; other servers due to pyls key, but would prefer only sending this
-        ;; when pyls gets initialised (:initialize function in
-        ;; lsp-define-stdio-client is invoked too early (before server
-        ;; start)) -- cpbotha
-        (defun lsp-set-cfg ()
-          (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
-            ;; TODO: check lsp--cur-workspace here to decide per server / project
-            (lsp--set-configuration lsp-cfg)))
+    (setq lsp-language-id-configuration 
+     '((python-mode . "python")))
 
-        (add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
+    ;; NB: only required if you prefer flake8 instead of the default
+    ;; send pyls config via lsp-after-initialize-hook -- harmless for
+    ;; other servers due to pyls key, but would prefer only sending this
+    ;; when pyls gets initialised (:initialize function in
+    ;; lsp-define-stdio-client is invoked too early (before server
+    ;; start)) -- cpbotha
+    (defun lsp-set-cfg ()
+      (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
+        (lsp--set-configuration lsp-cfg)))
 
-        ;; LSP debugging
-        ;;(setq lsp-print-io t)
-        ;;(setq lsp-trace t)
-        ;;(setq lsp-print-performance t)
-        )
+    (add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
+
+    ;; LSP debugging
+    ;;(setq lsp-print-io t)
+    ;;(setq lsp-trace t)
+    ;;(setq lsp-print-performance t)
+    )
 #+END_SRC
 
 ** Python
