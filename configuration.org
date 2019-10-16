@@ -265,68 +265,72 @@ More readable.
       (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
       (push (org-projectile-project-todo-entry) org-capture-templates)))
 #+END_SRC
+* Helm
 
-* Ivy
+Helm for our completion engine - I like both Helm and Ivy, but prefer Helm a little more.
 
-Ivy completion - the minibuff is best buff.
+First installing related fuzzy match packages so we can configure them alongside the main Helm package.
+
 #+BEGIN_SRC emacs-lisp
-  (use-package ivy
-    :diminish)
+  (use-package flx)
+  (use-package helm-flx)
 #+END_SRC
 
-Enable Ivy everywhere.
+Now the juice, don yer hats.
+
 #+BEGIN_SRC emacs-lisp
-  (ivy-mode 1)
+  (use-package helm
+    :demand
+    :diminish helm-mode
+    :bind (("M-x" . helm-M-x)
+           ("M-y" . helm-show-kill-ring)
+           ("C-x b" . helm-mini)
+           ("C-x C-f" . helm-find-files))
+    :config
+    (helm-mode 1)
+    (helm-flx-mode +1)
+    (setq helm-M-x-fuzzy-match t)
+    (setq helm-locate-fuzzy-match t)
+    (setq helm-lisp-fuzzy-completion t)
+    (setq helm-buffer-max-length 48))
 #+END_SRC
 
-Configuration.
-#+BEGIN_SRC emacs-lisp
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
-#+END_SRC
+Sort of related, let's use =ripgrep= for our searching, and bring in =helm-rg= as well.
 
-All the keybindings!
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-s") 'swiper-isearch)
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "M-y") 'counsel-yank-pop)
-  (global-set-key (kbd "C-h f") 'counsel-describe-function)
-  (global-set-key (kbd "C-h v") 'counsel-describe-function)
-  (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c L") 'counsel-git-log)
-  (global-set-key (kbd "C-c k") 'counsel-rg)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume)
-  (global-set-key (kbd "C-c o") 'counsel-outline)
-  (global-set-key (kbd "C-c C-f") 'counsel-org-file)
+  (use-package rg)
+  (use-package helm-rg
+    :config (setq helm-rg-default-directory 'git-root))
 #+END_SRC
 
 * Development
-
 ** Projectile
 
-Love me some projectile. Use ivy as our completion engine (when we're not delegating to =counsel-projectile=)
+Love me some projectile.
+
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
     :diminish projectile-mode
     :config
-    (setq projectile-completion-system 'ivy)
     (setq-default projectile-mode-line
      '(:eval
        (if (file-remote-p default-directory)
            " Proj"
          (format " Proj[%s]" (projectile-project-name)))))
-    (add-to-list 'projectile-globally-ignored-directories "node_modules"))
+    (add-to-list 'projectile-globally-ignored-directories "node_modules")
+    (add-to-list 'projectile-globally-ignored-directories "env")
+    (add-to-list 'projectile-globally-ignored-directories ".venv"))
 #+END_SRC
 
-Counsel-projectile to get all that ivy goodness.
+Let's add some Helm to that.
+
 #+BEGIN_SRC emacs-lisp
-  (use-package counsel-projectile
-    :diminish
-    :config
-    (counsel-projectile-mode)
-    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+  (use-package helm-projectile
+    :bind (("C-c v" . helm-projectile)
+           ("C-c f" . helm-projectile-find-file)
+           ("C-c b" . helm-projectile-switch-to-buffer)
+           ("C-c s" . helm-projectile-rg)
+           ("C-c w" . helm-projectile-switch-project)))
 #+END_SRC
 
 ** LSP
@@ -347,7 +351,7 @@ Configure LSP - I only use it for Python, currently.
       (push 'company-lsp company-backends))
 
     (use-package helm-lsp
-      :commands helm-lsp-workspace-symbol)
+      :commands (helm-lsp-workspace-symbol helm-lsp-global-workspace-symbol))
 
     (add-hook 'python-mode-hook 'lsp)
 
