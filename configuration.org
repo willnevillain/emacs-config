@@ -44,15 +44,23 @@ Benchmarking Emacs startup. We want to include this as early as possible in this
 
 Can get results on startup with =benchmark-init/show-durations-tabulated=
 
+* Better Defaults
+
+Main things I desire that we get with =better-defaults= are as follows:
+- Disable toolbar, menu bar, scroll bar
+- =uniquify= library to append directory names in buffer if file name not unique
+- =C-x C-b= uses ibuffer
+- =show-paren-mode= enabled
+- More extensive apropos search
+- =indent-tabs-mode= defaulting to nil - spaces instead of tabs
+
+#+BEGIN_SRC emacs-lisp
+(use-package better-defaults)
+#+END_SRC
+
 * UI/UX
 I only use GUI emacs - these are baseline modifications.
 ** Windows, Frames and Buffers
-*** Disable noisy emacs GUI elements
-#+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
-#+END_SRC
 *** If OS X "bonks" at me one more time
 #+BEGIN_SRC emacs-lisp
 (setq ring-bell-function 'ignore)
@@ -294,18 +302,7 @@ All the keybindings!
   (global-set-key (kbd "C-c C-f") 'counsel-org-file)
 #+END_SRC
 
-https://github.com/abo-abo/swiper
-http://oremacs.com/swiper/#key-bindings
-https://github.com/emacs-lsp/lsp-ivy
-https://github.com/ericdanan/counsel-projectile
-
 * Development
-
-We want spaces, not tabs.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil)
-#+END_SRC
 
 ** Projectile
 
@@ -625,10 +622,6 @@ RSS feeds - should move the feed definitions to another file.
   (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
 * Misc Configuration
-** Better defaults
-#+BEGIN_SRC emacs-lisp
-(use-package better-defaults)
-#+END_SRC
 ** exec-path-from-shell (OSX specific)
 #+BEGIN_SRC emacs-lisp
 (use-package exec-path-from-shell
@@ -642,27 +635,6 @@ RSS feeds - should move the feed definitions to another file.
 Don't like to pollute the file tree with backups if I don't have to.
 #+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-#+END_SRC
-** Eshell here
-Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#eshell-here][Adrien]] for this one.
- #+BEGIN_SRC emacs-lisp
- (defun eshell-here ()
-  "Opens up a new shell in the directory associated with the
-    current buffer's file. The eshell is renamed to match that
-    directory to make multiple eshell windows easier."
-  (interactive)
-  (let* ((height (/ (window-total-height) 3)))
-    (split-window-vertically (- height))
-    (other-window 1)
-    (eshell "new")
-    (insert (concat "ls"))
-    (eshell-send-input)))
-
-(bind-key "C-!" 'eshell-here)
- #+END_SRC
-** Generic diminishes
-#+BEGIN_SRC emacs-lisp
-  ;; TODO fill this in with mode diminshes as appropriate, modeline is getting crowded
 #+END_SRC
 * Unsorted
 Empty!...for now.
