@@ -258,27 +258,42 @@ More readable.
       (push (org-projectile-project-todo-entry) org-capture-templates)))
 #+END_SRC
 
-* Helm
+* Ivy
+
+Ivy completion - the minibuff is best buff.
 #+BEGIN_SRC emacs-lisp
-  (use-package flx)
-  (use-package helm-flx)
-  (use-package helm
-    :demand
-    :diminish helm-mode
-    :bind (("M-x" . helm-M-x)
-           ("M-y" . helm-show-kill-ring)
-           ("C-x b" . helm-mini)
-           ("C-x C-f" . helm-find-files))
-    :config
-    (helm-mode 1)
-    (helm-flx-mode +1)
-    (setq helm-M-x-fuzzy-match t)
-    (setq helm-locate-fuzzy-match t)
-    (setq helm-lisp-fuzzy-completion t)
-    (setq helm-buffer-max-length 48))
+  (use-package ivy
+    :diminish)
 #+END_SRC
 
-* Ivy
+Enable Ivy everywhere.
+#+BEGIN_SRC emacs-lisp
+  (ivy-mode 1)
+#+END_SRC
+
+Configuration.
+#+BEGIN_SRC emacs-lisp
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "(%d/%d) ")
+#+END_SRC
+
+All the keybindings!
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-s") 'swiper-isearch)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "M-y") 'counsel-yank-pop)
+  (global-set-key (kbd "C-h f") 'counsel-describe-function)
+  (global-set-key (kbd "C-h v") 'counsel-describe-function)
+  (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c L") 'counsel-git-log)
+  (global-set-key (kbd "C-c k") 'counsel-rg)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key (kbd "C-c o") 'counsel-outline)
+  (global-set-key (kbd "C-c C-f") 'counsel-org-file)
+#+END_SRC
+
 https://github.com/abo-abo/swiper
 http://oremacs.com/swiper/#key-bindings
 https://github.com/emacs-lsp/lsp-ivy
@@ -293,25 +308,28 @@ We want spaces, not tabs.
 #+END_SRC
 
 ** Projectile
+
+Love me some projectile. Use ivy as our completion engine (when we're not delegating to =counsel-projectile=)
 #+BEGIN_SRC emacs-lisp
-  (use-package ag)
-  (use-package helm-ag)
   (use-package projectile
     :diminish projectile-mode
     :config
-    (projectile-mode)
+    (setq projectile-completion-system 'ivy)
     (setq-default projectile-mode-line
      '(:eval
        (if (file-remote-p default-directory)
            " Proj"
          (format " Proj[%s]" (projectile-project-name)))))
     (add-to-list 'projectile-globally-ignored-directories "node_modules"))
-  (use-package helm-projectile
-    :bind (("C-c v" . helm-projectile)
-           ("C-c f" . helm-projectile-find-file)
-           ("C-c b" . helm-projectile-switch-to-buffer)
-           ("C-c C-v" . helm-projectile-ag)
-           ("C-c w" . helm-projectile-switch-project)))
+#+END_SRC
+
+Counsel-projectile to get all that ivy goodness.
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile
+    :diminish
+    :config
+    (counsel-projectile-mode)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+END_SRC
 
 ** LSP
