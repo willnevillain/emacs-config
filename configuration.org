@@ -219,10 +219,10 @@ Add some more states for todos.
 #+END_SRC
 
 ** Exporting
+
+Export to github flavored markdown
 #+BEGIN_SRC emacs-lisp
-  (use-package ox-md
-    :ensure nil
-    :defer t)
+  (use-package ox-gfm)
 #+END_SRC
 
 ** Org-babel
@@ -315,7 +315,7 @@ Love me some projectile.
   (use-package projectile
     :diminish projectile-mode
     :config
-    (setq projectile-project-search-path '("~/.emacs.d/")))
+    (setq projectile-project-search-path '("~/.emacs.d/"))
     (if (file-directory-p "~/code/")
         (add-to-list 'projectile-project-search-path "~/code/"))
     (if (file-directory-p "~/dev/")

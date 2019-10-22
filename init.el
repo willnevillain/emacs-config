@@ -43,7 +43,7 @@
     ("8f97d5ec8a774485296e366fdde6ff5589cf9e319a584b845b6f7fa788c9fa9a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" default)))
  '(package-selected-packages
    (quote
-    (helm-ag ag lsp-ivy benchmark-init company-restclient org-projectile ox-md paredit rainbow-delimiters clojure-mode cider lsp-python-ms pyvenv csv-mode org-present exec-path-from-shell better-defaults neotree elfeed dockerfile-mode json-mode yaml-mode fish-mode restclient elpy projectile counsel helm-flx flx epresent org-download org-bullets forge magit all-the-icons nyan-mode gruvbox-theme color-theme-sanityinc-tomorrow auto-compile diminish use-package))))
+    (ox-gfm helm-ag ag lsp-ivy benchmark-init company-restclient org-projectile ox-md paredit rainbow-delimiters clojure-mode cider lsp-python-ms pyvenv csv-mode org-present exec-path-from-shell better-defaults neotree elfeed dockerfile-mode json-mode yaml-mode fish-mode restclient elpy projectile counsel helm-flx flx epresent org-download org-bullets forge magit all-the-icons nyan-mode gruvbox-theme color-theme-sanityinc-tomorrow auto-compile diminish use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
