@@ -650,6 +650,14 @@ Don't like to pollute the file tree with backups if I don't have to.
 #+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+END_SRC
+** Diminishes
+#+BEGIN_SRC emacs-lisp
+  (diminish 'abbrev-mode)
+  (diminish 'eldoc-mode)
+  (diminish 'company-mode)
+  (diminish 'auto-revert-mode)
+#+END_SRC
+
 * Unsorted
 Empty!...for now.
 
