@@ -417,7 +417,7 @@ I start off my work flow by calling the below function to set my virtualenv and 
   (defun olympus-activate ()
     (interactive)
     (pyvenv-activate olympus-env-dir)
-    (setenv "VIRTUALENV" olympus-env-dir))
+    (setenv "VIRTUAL_ENV" olympus-env-dir))
 #+END_SRC
 
 Search and run all tests for function name under point (by naming convention).
