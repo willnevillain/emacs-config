@@ -202,12 +202,13 @@ Export to github flavored markdown
 ** Org-babel
 Load up the languages we want org-babel to be able to execute.
 #+BEGIN_SRC emacs-lisp
-(org-babel-do-load-languages
- (quote org-babel-load-languages)
- (quote ((emacs-lisp . t)
-         (python . t)
-         (shell . t)
-         (org . t))))
+  (org-babel-do-load-languages
+   (quote org-babel-load-languages)
+   (quote ((emacs-lisp . t)
+           (python . t)
+           (shell . t)
+           (javascript . t)
+           (org . t))))
 #+END_SRC
 
 ** Org-bullets
@@ -424,7 +425,7 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
 #+END_SRC
 ** JavaScript / Web
 
-=js2-mode= is 1 better than build in JS Mode.
+=js2-mode= is 1 better than builtin JS Mode.
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
     :defer t
@@ -539,7 +540,7 @@ Company hooks to enable fuzzy completion when in minor mode cider-mode.
     :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 ** Company
-Company-mode quality of life fixes
+Company-mode quality of life fixes. 
 #+BEGIN_SRC emacs-lisp
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
@@ -563,7 +564,6 @@ Let's add a dash of company to that.
   (use-package company-restclient
     :config (add-to-list 'company-backends 'company-restclient))
 #+END_SRC
-
 
 *** Fish Shell
 #+BEGIN_SRC emacs-lisp
