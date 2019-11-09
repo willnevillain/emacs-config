@@ -320,55 +320,57 @@ Let's add some Helm to that.
 ** LSP
 
 Configure LSP - I only use it for Python, currently.
+EDIT: I've reverted to elpy for a span while I troubleshoot some Jedi related bugs with pyls.
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :config
-    (require 'lsp-clients)
+  ;; (use-package lsp-mode
+  ;;   :config
+  ;;   (require 'lsp-clients)
 
-    (use-package lsp-ui
-      :config
-      (setq lsp-ui-sideline-ignore-duplicate t)
-      (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+  ;;   (use-package lsp-ui
+  ;;     :config
+  ;;     (setq lsp-ui-sideline-ignore-duplicate t)
+  ;;     (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
-    (use-package company-lsp
-      :config
-      (push 'company-lsp company-backends))
+  ;;   (use-package company-lsp
+  ;;     :config
+  ;;     (push 'company-lsp company-backends))
 
-    (use-package helm-lsp
-      :commands (helm-lsp-workspace-symbol helm-lsp-global-workspace-symbol))
+  ;;   (use-package helm-lsp
+  ;;     :commands (helm-lsp-workspace-symbol helm-lsp-global-workspace-symbol))
 
-    (add-hook 'python-mode-hook 'lsp)
+  ;;   (add-hook 'python-mode-hook 'lsp)
 
-    (setq lsp-language-id-configuration 
-     '((python-mode . "python")))
+  ;;   (setq lsp-language-id-configuration 
+  ;;    '((python-mode . "python")))
 
-    ;; NB: only required if you prefer flake8 instead of the default
-    ;; send pyls config via lsp-after-initialize-hook -- harmless for
-    ;; other servers due to pyls key, but would prefer only sending this
-    ;; when pyls gets initialised (:initialize function in
-    ;; lsp-define-stdio-client is invoked too early (before server
-    ;; start)) -- cpbotha
-    (defun lsp-set-cfg ()
-      (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
-        (lsp--set-configuration lsp-cfg)))
+  ;;   ;; NB: only required if you prefer flake8 instead of the default
+  ;;   ;; send pyls config via lsp-after-initialize-hook -- harmless for
+  ;;   ;; other servers due to pyls key, but would prefer only sending this
+  ;;   ;; when pyls gets initialised (:initialize function in
+  ;;   ;; lsp-define-stdio-client is invoked too early (before server
+  ;;   ;; start)) -- cpbotha
+  ;;   (defun lsp-set-cfg ()
+  ;;     (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
+  ;;       (lsp--set-configuration lsp-cfg)))
 
-    (add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
+  ;;   (add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
 
-    ;; LSP debugging
-    ;;(setq lsp-print-io t)
-    ;;(setq lsp-trace t)
-    ;;(setq lsp-print-performance t)
-    )
+  ;;   ;; LSP debugging
+  ;;   (setq lsp-print-io t)
+  ;;   (setq lsp-log-io t)
+  ;;   (setq lsp-trace t)
+  ;;   (setq lsp-print-performance t)
+  ;;   )
 #+END_SRC
 
 ** Python
 Trying out lsp, but keeping elpy config around just in case
 #+BEGIN_SRC emacs-lisp
-  ;;(use-package elpy
-  ;;  :config
-  ;;  (setq python-shell-interpreter "ipython"
-  ;;        python-shell-interpreter-args "-i --simple-prompt")
-  ;;  (elpy-enable))
+  (use-package elpy
+   :config
+   (setq python-shell-interpreter "ipython"
+         python-shell-interpreter-args "-i --simple-prompt")
+   (elpy-enable))
 #+END_SRC
 
 Need to use =pyvenv= to activate the relevant virtualenv for your project.
