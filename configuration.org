@@ -376,28 +376,30 @@ Configure LSP - I only use it for Python, currently.
     ;; (add-hook 'lsp-mode-hook 'lsp-set-cfg)
 
     ;; Python mspyls configuration
-    (defun dub-lsp-setup-python ()
-      "Set up syntax checker."
+    (defun dub/lsp-setup-python ()
+      "Set up syntax checker when using mspyls for Python."
       (progn
         (require 'lsp-python-ms)
         (lsp)
         (setq-local flycheck-checker 'python-flake8)))
 
     (use-package lsp-python-ms
-      :hook (python-mode . dub-lsp-setup-python))
+      :hook (python-mode . dub/lsp-setup-python))
 
+    (add-to-list 'lsp-file-watch-ignored "[/\\\\]env$")
+    (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.venv$")
     ;; LSP debugging
-    (setq lsp-print-io t)
-    (setq lsp-log-io t)
-    (setq lsp-trace t)
-    (setq lsp-print-performance t))
+    ;; (setq lsp-print-io t)
+    ;; (setq lsp-log-io t)
+    ;; (setq lsp-trace t)
+    ;; (setq lsp-print-performance t)
+   )
 #+END_SRC
 
-#+RESULTS:
-: t
-
 ** Python
+
 Trying out lsp, but keeping elpy config around just in case
+
 #+BEGIN_SRC emacs-lisp
   ;; (use-package elpy
   ;;  :config
@@ -417,16 +419,18 @@ These are idiomatic to my current work codebase,
 and invoke fabric commands to set environment correctly,
 but feel free to harvest any useful bits.
 
-THE MOST IMPORTANT ONE: for some reason, even after activating a virtualenv with =pyvenv-activate=, each time I visit a new Python file in the project, a new LSP process will spawn.
-This leaves me with something on the order of 40-50 processes before it eventually stops working, raising a generic "Too many open files" LSP OSError.
-I start off my work flow by calling the below function to set my virtualenv and the VIRTUALENV environment variable for the relevant work project.
+
+This is a helper function to quickly jump to my primary work codebase.
+
 #+BEGIN_SRC emacs-lisp
   (defvar olympus-env-dir "/Users/will/code/olympus/env")
 
   (defun olympus-activate ()
     (interactive)
     (pyvenv-activate olympus-env-dir)
-    (setenv "VIRTUAL_ENV" olympus-env-dir))
+    (setenv "VIRTUAL_ENV" olympus-env-dir)
+    ;; TODO open olympus readme buffer, make primary
+  )
 #+END_SRC
 
 Search and run all tests for function name under point (by naming convention).
@@ -455,7 +459,11 @@ This needs some cleaning up, esp as we pollute the default-directory, but it wor
   (add-hook 'python-mode-hook
             (lambda () (local-set-key (kbd "C-c t") 'run-pytest-for-word-at-point)))
 #+END_SRC
-** JavaScript / Web
+** JavaScript / Typescript / Web
+
+One day in the future I'll start using lsp-mode for JS as well. Since I primarily do backend Pythpon, I haven't put in the time to configure it yet.
+
+This config is mostly borrowed from the fantastic Jamie Collinson (their config is linked above).
 
 =js2-mode= is 1 better than builtin JS Mode.
 #+BEGIN_SRC emacs-lisp
@@ -584,7 +592,7 @@ Company-mode quality of life fixes.
 ** Development adjacent
 *** Restclient
 
-This is a pretty cool package that I haven't dived into enough, hoping to use is as a postman replacement.
+Restclient consistently gets oohs and aahs when I use it to demo at sprint reviews - thanks to it I've been able to ditch Postman.
 
 #+BEGIN_SRC emacs-lisp
 (use-package restclient)
@@ -598,21 +606,37 @@ Let's add a dash of company to that.
 #+END_SRC
 
 *** Fish Shell
+
+For editing Fish shell files - this may go away if I ever have the courage to fully pivot to eshell.
+
 #+BEGIN_SRC emacs-lisp
 (use-package fish-mode)
 #+END_SRC
+
 *** Yaml Mode
+
+Who doesn't have to edit some yaml in this day and age?
+
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode)
 #+END_SRC
+
 *** JSON Mode
+
+This feels like the "don't you guys have phones?" of major modes.
+
 #+BEGIN_SRC emacs-lisp
 (use-package json-mode)
 #+END_SRC
+
 *** Dockerfile Mode
+
+I don't often edit Dockerfiles, but when I do...
+
 #+BEGIN_SRC emacs-lisp
 (use-package dockerfile-mode)
 #+END_SRC
+
 * Snippets
 
 Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community library]], which are saved in =~/.emacs.d/yasnippet-snippets=. My snippets are in =~/.emacs.d/snippets=.
@@ -628,7 +652,9 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
 #+END_SRC
 
 * Elfeed
-RSS feeds - should move the feed definitions to another file.
+
+RSS feeds - should move the feed definitions to another file. Honestly though, I don't use this very much.
+
 #+BEGIN_SRC emacs-lisp
 (use-package elfeed
   :bind ("C-x w" . elfeed)
@@ -642,6 +668,7 @@ RSS feeds - should move the feed definitions to another file.
         ("https://blog.jessfraz.com/index.xml" tech)))
   (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
+
 * Misc Configuration
 ** exec-path-from-shell (OSX specific)
 #+BEGIN_SRC emacs-lisp
