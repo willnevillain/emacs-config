@@ -45,7 +45,7 @@
  '(lsp-ui-sideline-enable nil t)
  '(package-selected-packages
    (quote
-    (todoist flycheck ox-gfm helm-ag ag lsp-ivy benchmark-init company-restclient org-projectile ox-md paredit rainbow-delimiters clojure-mode cider lsp-python-ms pyvenv csv-mode org-present exec-path-from-shell better-defaults neotree elfeed dockerfile-mode json-mode yaml-mode fish-mode restclient elpy projectile counsel helm-flx flx epresent org-download org-bullets forge magit all-the-icons nyan-mode gruvbox-theme color-theme-sanityinc-tomorrow auto-compile diminish use-package))))
+    (helpful todoist flycheck ox-gfm helm-ag ag lsp-ivy benchmark-init company-restclient org-projectile ox-md paredit rainbow-delimiters clojure-mode cider lsp-python-ms pyvenv csv-mode org-present exec-path-from-shell better-defaults neotree elfeed dockerfile-mode json-mode yaml-mode fish-mode restclient elpy projectile counsel helm-flx flx epresent org-download org-bullets forge magit all-the-icons nyan-mode gruvbox-theme color-theme-sanityinc-tomorrow auto-compile diminish use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -18,13 +18,13 @@ baseline configuration.
 
 Ensure that =use-package= installs package if not already installed.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (setq use-package-always-ensure t)
 #+END_SRC
 
 Always compile packages, and use the newest version available.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package auto-compile
     :config (auto-compile-on-load-mode))
 
@@ -162,16 +162,17 @@ You can basically do everything from magit-status.
 
 Base configuration.
 
-#+BEGIN_SRC emacs-lisp
-(use-package org
-  :bind (("C-c l" . org-store-link)
-         ("C-c a" . org-agenda))
-         ("C-c c" . org-capture))
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package org
+    :bind (("C-c l" . org-store-link)
+           ("C-c a" . org-agenda)
+           ("C-c c" . org-capture))
+    :hook (org-mode . org-indent-mode))
 #+END_SRC
 
 I like to log when tasks were completed, and log completion time of repeated tasks.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (setq org-log-done t)
 (setq org-log-repeat "time")
 #+END_SRC
@@ -179,13 +180,13 @@ I like to log when tasks were completed, and log completion time of repeated tas
 I keep all my org stuff in Dropbox. Experimenting with =beorg= on iOS,
 so this behooves me.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (setq org-agenda-files '("~/Dropbox/org"))
 #+END_SRC
 
 Add some more states for todos.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (setq org-todo-keywords
       '((sequence "TODO(t)" "WAIT(w@/!)""DONE(d!)")))
 (setq org-todo-keyword-faces
@@ -195,13 +196,13 @@ Add some more states for todos.
 ** Exporting
 
 Export to github flavored markdown
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package ox-gfm)
 #+END_SRC
 
 ** Org-babel
 Load up the languages we want org-babel to be able to execute.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (org-babel-do-load-languages
    (quote org-babel-load-languages)
    (quote ((emacs-lisp . t)
@@ -212,13 +213,13 @@ Load up the languages we want org-babel to be able to execute.
 
 ** Org-bullets
 More readable.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package org-bullets
   :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
 ** Capture Templates
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
         '(("t" "Todo" entry
            (file+headline "~/Dropbox/org/gtd.org" "Tasks")
@@ -229,7 +230,7 @@ More readable.
 #+END_SRC
 
 ** org-projectile
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package org-projectile
     :bind ("C-c n p" . org-projectile-project-todo-completing-read)
     :config
@@ -240,20 +241,21 @@ More readable.
       (push (org-projectile-project-todo-entry) org-capture-templates)))
 #+END_SRC
 ** TODO Org utility functions
+
 * Helm
 
 Helm for our completion engine - I like both Helm and Ivy, but prefer Helm a little more.
 
 First installing related fuzzy match packages so we can configure them alongside the main Helm package.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package flx)
   (use-package helm-flx)
 #+END_SRC
 
 Now the juice, don yer hats.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package helm
     :demand
     :diminish helm-mode
@@ -273,7 +275,7 @@ Now the juice, don yer hats.
 Sort of related, let's use =ripgrep= for our searching, and bring in =helm-rg= as well.
 EDIT: there's some bug I'm encountering trying to use =helm-rg=, going to default back to =helm-ag= for the moment.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   ;;(use-package rg)
   ;;(use-package helm-rg
   ;;  :config (setq helm-rg-default-directory 'git-root))
@@ -284,7 +286,7 @@ EDIT: there's some bug I'm encountering trying to use =helm-rg=, going to defaul
 * Development
 
 ** Flycheck
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package flycheck
     :ensure t
     :init (global-flycheck-mode))
@@ -294,7 +296,7 @@ EDIT: there's some bug I'm encountering trying to use =helm-rg=, going to defaul
 
 Love me some projectile.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package projectile
     :diminish projectile-mode
     :config
@@ -316,7 +318,7 @@ Love me some projectile.
 
 Let's add some Helm to that.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package helm-projectile
     :bind (("C-c v" . helm-projectile)
            ("C-c f" . helm-projectile-find-file)
@@ -330,7 +332,7 @@ Let's add some Helm to that.
 
 Configure LSP - I only use it for Python, currently.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package lsp-mode
     :config
     (require 'lsp-clients)
@@ -400,7 +402,7 @@ Configure LSP - I only use it for Python, currently.
 
 Trying out lsp, but keeping elpy config around just in case
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   ;; (use-package elpy
   ;;  :config
   ;;  (setq python-shell-interpreter "ipython"
@@ -409,7 +411,7 @@ Trying out lsp, but keeping elpy config around just in case
 #+END_SRC
 
 Need to use =pyvenv= to activate the relevant virtualenv for your project.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package pyvenv)
 #+END_SRC
 
@@ -422,7 +424,7 @@ but feel free to harvest any useful bits.
 
 This is a helper function to quickly jump to my primary work codebase.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (defvar olympus-env-dir "/Users/will/code/olympus/env")
 
   (defun olympus-activate ()
@@ -435,7 +437,7 @@ This is a helper function to quickly jump to my primary work codebase.
 
 Search and run all tests for function name under point (by naming convention).
 This needs some cleaning up, esp as we pollute the default-directory, but it works for now.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (defun run-pytest-for-word-at-point ()
     (interactive)  ;; TODO add a test for if (thing-at-point 'word) is nil - run all tests in file
     (run-pytest-for-word (thing-at-point 'word)))
@@ -466,7 +468,7 @@ One day in the future I'll start using lsp-mode for JS as well. Since I primaril
 This config is mostly borrowed from the fantastic Jamie Collinson (their config is linked above).
 
 =js2-mode= is 1 better than builtin JS Mode.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package js2-mode
     :defer t
     :mode "\\.js\\'"
@@ -476,7 +478,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 =js2-refactor= for some additional refactoring options on top of =js2-mode=.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package js2-refactor
     :defer t
     :config
@@ -486,13 +488,13 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 =rjsx-mode= for working with JSX.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package rjsx-mode
     :defer t)
 #+END_SRC
 
 =web-mode= for html/css.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package web-mode
     :mode "\\.html\\'"
     :config
@@ -502,7 +504,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 =web-beautify= for prettifying html/css by leveraging =js-beautify= - install this with =npm install -g js-beautify=.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package web-beautify
     :bind (:map web-mode-map
                 ("C-c b" . web-beautify-html)
@@ -511,7 +513,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 =prettier-js= for autoformatting of JS. Need to have =prettier= installed on host via your package manager.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package prettier-js
     :defer t
     :config
@@ -526,7 +528,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 =npm-mode= is a really nifty little package. Command map [[https://github.com/mojochao/npm-mode#command-keymap][here]].
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package npm-mode
     :defer t
     :hook
@@ -535,7 +537,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+END_SRC
 
 Utility function (hooked into flycheck) to use local eslint when present.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (defun dub/use-eslint-from-node-modules ()
       "Set local eslint if available. Credit: jamiecollinson.com/blog/my-emacs-config/#javascript"
       (let* ((root (locate-dominating-file
@@ -551,23 +553,23 @@ Utility function (hooked into flycheck) to use local eslint when present.
 ** Clojure (Lisp)
 
 Can't do much without a major mode.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package clojure-mode)
 #+END_SRC
 
 We definitely want CIDER, this is the bread and butter.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package cider)
 #+END_SRC
 
 Company hooks to enable fuzzy completion when in minor mode cider-mode.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
   (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
 #+END_SRC
 
 ** Paredit
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package paredit
     :diminish paredit-mode
     :hook ((clojure-mode . paredit-mode)
@@ -575,13 +577,13 @@ Company hooks to enable fuzzy completion when in minor mode cider-mode.
 #+END_SRC
 
 ** RainbowDelimiters
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 ** Company
 Company-mode quality of life fixes. 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
@@ -594,13 +596,13 @@ Company-mode quality of life fixes.
 
 Restclient consistently gets oohs and aahs when I use it to demo at sprint reviews - thanks to it I've been able to ditch Postman.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package restclient)
 #+END_SRC
 
 Let's add a dash of company to that.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package company-restclient
     :config (add-to-list 'company-backends 'company-restclient))
 #+END_SRC
@@ -609,7 +611,7 @@ Let's add a dash of company to that.
 
 For editing Fish shell files - this may go away if I ever have the courage to fully pivot to eshell.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package fish-mode)
 #+END_SRC
 
@@ -617,7 +619,7 @@ For editing Fish shell files - this may go away if I ever have the courage to fu
 
 Who doesn't have to edit some yaml in this day and age?
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package yaml-mode)
 #+END_SRC
 
@@ -625,7 +627,7 @@ Who doesn't have to edit some yaml in this day and age?
 
 This feels like the "don't you guys have phones?" of major modes.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package json-mode)
 #+END_SRC
 
@@ -633,7 +635,7 @@ This feels like the "don't you guys have phones?" of major modes.
 
 I don't often edit Dockerfiles, but when I do...
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package dockerfile-mode)
 #+END_SRC
 
@@ -641,7 +643,7 @@ I don't often edit Dockerfiles, but when I do...
 
 Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community library]], which are saved in =~/.emacs.d/yasnippet-snippets=. My snippets are in =~/.emacs.d/snippets=.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (use-package yasnippet
     :diminish yas-minor-mode
     :config
@@ -655,7 +657,7 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
 
 RSS feeds - should move the feed definitions to another file. Honestly though, I don't use this very much.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package elfeed
   :bind ("C-x w" . elfeed)
   :config
@@ -669,9 +671,20 @@ RSS feeds - should move the feed definitions to another file. Honestly though, I
   (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
 
+* Internal Doc Enhancement
+** =helpful= for prettier docs
+#+BEGIN_SRC emacs-lisp  :results output silent
+  (use-package helpful
+    :bind (("C-h f" . helpful-callable)
+           ("C-h v" . helpful-variable)
+           ("C-h k" . helpful-key)
+           ("C-h F" . helpful-function)
+           ("C-h C" . helpful-command)))
+#+END_SRC
+
 * Misc Configuration
 ** exec-path-from-shell (OSX specific)
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (use-package exec-path-from-shell
   :config
   (when (memq window-system '(mac ns))
@@ -681,11 +694,11 @@ RSS feeds - should move the feed definitions to another file. Honestly though, I
 #+END_SRC
 ** Backups in one folder
 Don't like to pollute the file tree with backups if I don't have to.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+END_SRC
 ** Diminishes
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
   (diminish 'abbrev-mode)
   (diminish 'eldoc-mode)
   (diminish 'company-mode)
