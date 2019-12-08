@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: emacs-lisp source block silent result
+# key: sel
+# --
+emacs-lisp :results output silent
