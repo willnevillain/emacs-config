@@ -44,7 +44,8 @@ Benchmarking Emacs startup. We want to include this as early as possible in this
 
 Can get results on startup with =benchmark-init/show-durations-tabulated=
 
-* Better Defaults
+* Defaults
+** Better Defaults
 
 Main things I desire that we get with =better-defaults= are as follows:
 - Disable toolbar, menu bar, scroll bar
@@ -55,7 +56,15 @@ Main things I desire that we get with =better-defaults= are as follows:
 - =indent-tabs-mode= defaulting to nil - spaces instead of tabs
 
 #+BEGIN_SRC emacs-lisp :results output silent
-(use-package better-defaults)
+  (use-package better-defaults)
+#+END_SRC
+
+** Garbage Collection 
+
+Allow 40MB of memory before calling garbage collection.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq gc-cons-threshold 40000000)
 #+END_SRC
 
 * UI/UX
