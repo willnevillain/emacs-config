@@ -184,6 +184,7 @@ Base configuration.
            ("C-c a" . org-agenda)
            ("C-c c" . org-capture))
     :hook (org-mode . org-indent-mode))
+  (setq org-directory "~/Dropbox/org/")
 #+END_SRC
 
 I like to log completion time of repeated tasks.
@@ -206,6 +207,21 @@ Add some more states for todos.
         '((sequence "TODO(t)" "WAIT(w@/!)""DONE(d!)")))
   (setq org-todo-keyword-faces
              '(("WAIT" . "yellow")))
+#+END_SRC
+
+** Utility Functions
+
+Lifted from [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#org-mode][here]], thanks Adrien
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (defun org-file-path (filename)
+    "Return the absolute address of an org file, given its relative name."
+    (concat (file-name-as-directory org-directory) filename))
+
+  (defun org-find-file ()
+    "Leverage Helm to quickly open any org files."
+    (interactive)
+    (find-file (org-file-path (helm-comp-read "Select your org file: " (directory-files org-directory nil "\.org$")))))
 #+END_SRC
 
 ** Exporting
@@ -232,7 +248,9 @@ More readable.
 (use-package org-bullets
   :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
-** Capture Templates
+** TODO Capture Templates
+
+These capture templates are no longer up to date with my workflows
 
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
