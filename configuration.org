@@ -250,16 +250,21 @@ More readable.
 #+END_SRC
 ** TODO Capture Templates
 
-These capture templates are no longer up to date with my workflows
+These capture templates are no longer up to date with my workflows.
+Need to match beorg capture templates at minimum.
 
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
-        '(("t" "Todo" entry
-           (file+headline "~/Dropbox/org/gtd.org" "Tasks")
-           "* TODO %?\n %i\n %a")
-           ("e" "Emacs idea/project" entry
-           (file+headline "~/Dropbox/org/emacs-ideas.org" "Ideas")
-           "* %?\n")))
+        '(("t" "TODOs")
+          ("tq" "Quick TODO" entry
+           (file+headline "~/Dropbox/org/gtd.org" "Shortterm")
+           "* TODO %?\nSCHEDULED: %t\nCaptured: %U\n")
+          ("tp" "Personal TODO" entry
+           (file+headline "~/Dropbox/org/gtd.org" "Personal")
+           "* TODO %?\nCaptured: %U\n")
+          ("te" "Emacs Todo" entry
+           (file+headline "~/Dropbox/org/gtd.org" "Emacs")
+           "* TODO %?\nCaptured: %U\n")))
 #+END_SRC
 
 ** org-projectile
