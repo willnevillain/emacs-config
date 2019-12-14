@@ -222,6 +222,8 @@ Lifted from [[https://github.com/abrochard/emacs-config/blob/master/configuratio
     "Leverage Helm to quickly open any org files."
     (interactive)
     (find-file (org-file-path (helm-comp-read "Select your org file: " (directory-files org-directory nil "\.org$")))))
+
+  (global-set-key (kbd "C-c M-o") 'org-find-file)
 #+END_SRC
 
 ** Exporting
@@ -255,16 +257,24 @@ Need to match beorg capture templates at minimum.
 
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
-        '(("t" "TODOs")
-          ("tq" "Quick TODO" entry
+        '(("t" "Quick TODO" entry
            (file+headline "~/Dropbox/org/gtd.org" "Shortterm")
            "* TODO %?\nSCHEDULED: %t\nCaptured: %U\n")
-          ("tp" "Personal TODO" entry
+          ("p" "Personal TODO" entry
            (file+headline "~/Dropbox/org/gtd.org" "Personal")
            "* TODO %?\nCaptured: %U\n")
-          ("te" "Emacs Todo" entry
+          ("e" "Emacs Todo" entry
            (file+headline "~/Dropbox/org/gtd.org" "Emacs")
-           "* TODO %?\nCaptured: %U\n")))
+           "* TODO %?\nCaptured: %U\n")
+          ("r" "Restaurant" entry
+           (file+headline "~/Dropbox/org/lists.org" "Restaurants")
+           "* UPCOMING %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
+          ("m" "Movie" entry
+           (file+headline "~/Dropbox/org/lists.org" "Movies")
+           "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
+          ("s" "TV Show" entry
+           (file+headline "~/Dropbox/org/lists.org" "TV Shows")
+           "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")))
 #+END_SRC
 
 ** org-projectile
@@ -399,29 +409,29 @@ Configure LSP - I only use it for Python, currently.
       '((python-mode . "python")))
 
     ;; Python pyls configuration
-    ;; (add-hook 'python-mode-hook 'lsp)
-    ;; (setq lsp-pyls-configuration-sources ["flake8" "pycodestyle"])
-    ;; (setq lsp-pyls-plugins-flake8-enabled t)
-    ;; (setq lsp-pyls-plugins-pylint-enabled nil)
-    ;; (setq lsp-pyls-plugins-pyflakes-enabled nil)
-    ;; (setq lsp-pyls-plugins-yapf-enabled nil)
+    (add-hook 'python-mode-hook 'lsp)
+    (setq lsp-pyls-configuration-sources ["flake8" "pycodestyle"])
+    (setq lsp-pyls-plugins-flake8-enabled t)
+    (setq lsp-pyls-plugins-pylint-enabled nil)
+    (setq lsp-pyls-plugins-pyflakes-enabled nil)
+    (setq lsp-pyls-plugins-yapf-enabled nil)
 
-    ;; (defun lsp-set-cfg ()
-    ;;   (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
-    ;;     (lsp--set-configuration lsp-cfg)))
+    (defun lsp-set-cfg ()
+      (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
+        (lsp--set-configuration lsp-cfg)))
 
-    ;; (add-hook 'lsp-mode-hook 'lsp-set-cfg)
+    (add-hook 'lsp-mode-hook 'lsp-set-cfg)
 
-    ;; Python mspyls configuration
-    (defun dub/lsp-setup-python ()
-      "Set up syntax checker when using mspyls for Python."
-      (progn
-        (require 'lsp-python-ms)
-        (lsp)
-        (setq-local flycheck-checker 'python-flake8)))
+    ;; ;; Python mspyls configuration
+    ;; (defun dub/lsp-setup-python ()
+    ;;   "Set up syntax checker when using mspyls for Python."
+    ;;   (progn
+    ;;     (require 'lsp-python-ms)
+    ;;     (lsp)
+    ;;     (setq-local flycheck-checker 'python-flake8)))
 
-    (use-package lsp-python-ms
-      :hook (python-mode . dub/lsp-setup-python))
+    ;; (use-package lsp-python-ms
+    ;;   :hook (python-mode . dub/lsp-setup-python))
 
     (add-to-list 'lsp-file-watch-ignored "[/\\\\]env$")
     (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.venv$")
