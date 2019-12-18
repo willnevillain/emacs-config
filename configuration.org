@@ -67,6 +67,13 @@ Allow 40MB of memory before calling garbage collection.
   (setq gc-cons-threshold 40000000)
 #+END_SRC
 
+** Start Emacs server
+
+My main use case for this is in order to use org-protocol to capture from web browsers
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (server-start)
+#+END_SRC
 * UI/UX
 I only use GUI emacs - these are baseline modifications.
 ** Windows, Frames and Buffers
@@ -269,6 +276,9 @@ Need to match beorg capture templates at minimum.
           ("r" "Restaurant" entry
            (file+headline "~/Dropbox/org/lists.org" "Restaurants")
            "* UPCOMING %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
+          ("l" "Web Link" entry
+           (file+headline "~/Dropbox/org/lists.org" "Internet Content")
+           "* UPCOMING %:description\nCaptured: %U\n%:link\n")
           ("m" "Movie" entry
            (file+headline "~/Dropbox/org/lists.org" "Movies")
            "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
