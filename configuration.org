@@ -123,8 +123,14 @@ But keep gruvbox around in case I grow weary of tomorrow-eighties
 
 Also sometimes I like to fux with Dracula
 #+BEGIN_SRC emacs-lisp :results output silent
-  (use-package dracula-theme
-    :config (load-theme 'dracula t))
+  (use-package dracula-theme)
+    ;; :config (load-theme 'dracula t))
+#+END_SRC
+
+Other times solarized
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package solarized-theme
+    :config (load-theme 'solarized-light t))
 #+END_SRC
 *** Font
 
@@ -176,8 +182,8 @@ The number of times I've fat fingered C-x C-c...
 You can basically do everything from magit-status.
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit
-  :bind ("C-x g" . magit-status))
+  (use-package magit
+    :bind ("C-x g" . magit-status))
 #+END_SRC
 
 * Org Mode
