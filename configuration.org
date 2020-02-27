@@ -99,39 +99,11 @@ I only use GUI emacs - these are baseline modifications.
 #+END_SRC
 ** UI
 *** Theme
-Trying out tomorrow-eighties
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package color-theme-sanityinc-tomorrow
-    :defer t
-    :config
-    ;; (color-theme-sanityinc-tomorrow-eighties)
-    )
-#+END_SRC
-
-Some customize changes for tomorrow-eighties
 #+BEGIN_SRC emacs-lisp
-  ;; (custom-set-faces
-  ;;  '(org-block ((t (:inherit shadow :background "gray20")))))
+  (use-package nord-theme)
+  (load-theme 'nord t)
 #+END_SRC
 
-But keep gruvbox around in case I grow weary of tomorrow-eighties
-#+BEGIN_SRC emacs-lisp :results output silent
-(use-package gruvbox-theme
-  :defer t)
-  ;; :config (load-theme 'gruvbox-dark-medium t)
-#+END_SRC
-
-Also sometimes I like to fux with Dracula
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package dracula-theme)
-    ;; :config (load-theme 'dracula t))
-#+END_SRC
-
-Other times solarized
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package solarized-theme
-    :config (load-theme 'solarized-light t))
-#+END_SRC
 *** Font
 
 Use Hack font if installed.
@@ -169,8 +141,8 @@ The number of times I've fat fingered C-x C-c...
 #+END_SRC
 * Personal Information
 #+BEGIN_SRC emacs-lisp
-  (setq user-full-name "William Neville"
-        user-mail-address "william@neville.com"
+  (setq user-full-name "Will Neville"
+        user-mail-address "will@dubnev.com"
         calendar-latitude 40.72
         calendar-longitude -73.99
         calendar-location-name "New York, NY")
@@ -253,7 +225,6 @@ Load up the languages we want org-babel to be able to execute.
    (quote org-babel-load-languages)
    (quote ((emacs-lisp . t)
            (python . t)
-           (shell . t)
            (org . t))))
 #+END_SRC
 
@@ -263,46 +234,37 @@ More readable.
 (use-package org-bullets
   :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
-** TODO Capture Templates
+** Capture Templates
 
 These capture templates are no longer up to date with my workflows.
 Need to match beorg capture templates at minimum.
 
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
-        '(("t" "Quick TODO" entry
-           (file+headline "~/Dropbox/org/gtd.org" "Shortterm")
-           "* TODO %?\nSCHEDULED: %t\nCaptured: %U\n")
-          ("p" "Personal TODO" entry
-           (file+headline "~/Dropbox/org/gtd.org" "Personal")
-           "* TODO %?\nCaptured: %U\n")
-          ("e" "Emacs Todo" entry
-           (file+headline "~/Dropbox/org/gtd.org" "Emacs")
-           "* TODO %?\nCaptured: %U\n")
-          ("r" "Restaurant" entry
-           (file+headline "~/Dropbox/org/lists.org" "Restaurants")
-           "* UPCOMING %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
-          ("l" "Web Link" entry
-           (file+headline "~/Dropbox/org/lists.org" "Internet Content")
-           "* UPCOMING %:description\nCaptured: %U\n%:link\n")
-          ("m" "Movie" entry
-           (file+headline "~/Dropbox/org/lists.org" "Movies")
-           "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
-          ("s" "TV Show" entry
-           (file+headline "~/Dropbox/org/lists.org" "TV Shows")
-           "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")))
-#+END_SRC
-
-** org-projectile
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package org-projectile
-    :bind ("C-c n p" . org-projectile-project-todo-completing-read)
-    :config
-    (progn
-      (setq org-projectile-projects-file
-            "~/Dropbox/org/projects.org")
-      (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-      (push (org-projectile-project-todo-entry) org-capture-templates)))
+      '(("t" "Quick TODO" entry
+          (file+headline "~/Dropbox/org/gtd.org" "Shortterm")
+          "* TODO %?\nSCHEDULED: %t\nCaptured: %U\n")
+        ("p" "Personal TODO" entry
+          (file+headline "~/Dropbox/org/gtd.org" "Personal")
+          "* TODO %?\nCaptured: %U\n")
+        ("e" "Emacs Todo" entry
+          (file+headline "~/Dropbox/org/gtd.org" "Emacs")
+          "* TODO %?\nCaptured: %U\n")
+        ("r" "Restaurant" entry
+          (file+headline "~/Dropbox/org/lists.org" "Restaurants")
+          "* UPCOMING %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
+        ("l" "Web Link" entry
+          (file+headline "~/Dropbox/org/lists.org" "Internet Content")
+          "* UPCOMING %:description\nCaptured: %U\n%:link\n")
+        ("m" "Movie" entry
+          (file+headline "~/Dropbox/org/lists.org" "Movies")
+          "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
+        ("s" "TV Show" entry
+          (file+headline "~/Dropbox/org/lists.org" "TV Shows")
+          "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
+        ("b" "Book" entry
+         (file+headline "~/Dropbox/org/lists.org" "Books")
+         "* UPCOMING %?\nCaptured: %U\nAuthor(s): \nGist: \nSource: \n")))
 #+END_SRC
 
 * Helm
@@ -364,8 +326,6 @@ Love me some projectile.
     (setq projectile-project-search-path '("~/.emacs.d/"))
     (if (file-directory-p "~/code/")
         (add-to-list 'projectile-project-search-path "~/code/"))
-    (if (file-directory-p "~/dev/")
-        (add-to-list 'projectile-project-search-path "~/dev/"))
     (projectile-discover-projects-in-search-path)
     (setq-default projectile-mode-line
      '(:eval
@@ -373,7 +333,6 @@ Love me some projectile.
            " Proj"
          (format " Proj[%s]" (projectile-project-name)))))
     (add-to-list 'projectile-globally-ignored-directories "node_modules")
-    (add-to-list 'projectile-globally-ignored-directories "env")
     (add-to-list 'projectile-globally-ignored-directories ".venv"))
 #+END_SRC
 
@@ -384,8 +343,7 @@ Let's add some Helm to that.
     :bind (("C-c v" . helm-projectile)
            ("C-c f" . helm-projectile-find-file)
            ("C-c b" . helm-projectile-switch-to-buffer)
-           ;; ("C-c s" . helm-projectile-rg)
-           ("C-c s" . helm-projectile-ag)
+           ("C-c s" . helm-projectile-rg)
            ("C-c w" . helm-projectile-switch-project)))
 #+END_SRC
 

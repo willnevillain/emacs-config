@@ -39,12 +39,10 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("947190b4f17f78c39b0ab1ea95b1e6097cc9202d55c73a702395fc817f899393" "8f97d5ec8a774485296e366fdde6ff5589cf9e319a584b845b6f7fa788c9fa9a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" default)))
- '(lsp-ui-peek-always-show t t)
- '(lsp-ui-sideline-enable nil t)
+    ("7f6d4aebcc44c264a64e714c3d9d1e903284305fd7e319e7cb73345a9994f5ef" default)))
  '(package-selected-packages
    (quote
-    (solarized-theme dracula-theme helpful todoist flycheck ox-gfm helm-ag ag lsp-ivy benchmark-init company-restclient org-projectile ox-md paredit rainbow-delimiters clojure-mode cider lsp-python-ms pyvenv csv-mode org-present exec-path-from-shell better-defaults neotree elfeed dockerfile-mode json-mode yaml-mode fish-mode restclient elpy projectile counsel helm-flx flx epresent org-download org-bullets forge magit all-the-icons nyan-mode gruvbox-theme color-theme-sanityinc-tomorrow auto-compile diminish use-package))))
+    (nord-theme exec-path-from-shell helpful elfeed dockerfile-mode json-mode yaml-mode fish-mode company-restclient restclient rainbow-delimiters paredit cider clojure-mode npm-mode prettier-js web-beautify web-mode rjsx-mode js2-refactor js2-mode pyvenv helm-lsp company-lsp lsp-ui lsp-mode helm-projectile flycheck helm-ag ag helm-flx flx org-projectile org-bullets ox-gfm magit all-the-icons solarized-theme dracula-theme gruvbox-theme color-theme-sanityinc-tomorrow better-defaults benchmark-init auto-compile diminish use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
