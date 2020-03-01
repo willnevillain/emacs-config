@@ -268,6 +268,8 @@ More readable.
 
 I currently use Emacs as my reading list aggregator (mild plans to use Pocket in the future). We need =org-protocol= required to accept incoming requests, and to ensure that Emacs server is started.
 
+See [[https://github.com/xuchunyang/setup-org-protocol-on-mac][Setting Up org-protocl on Mac]] for more details.
+
 #+BEGIN_SRC emacs-lisp :results output silent
   (server-start)
   (require 'org-protocol)
