@@ -42,7 +42,7 @@
     ("7f6d4aebcc44c264a64e714c3d9d1e903284305fd7e319e7cb73345a9994f5ef" default)))
  '(package-selected-packages
    (quote
-    (nord-theme exec-path-from-shell helpful elfeed dockerfile-mode json-mode yaml-mode fish-mode company-restclient restclient rainbow-delimiters paredit cider clojure-mode npm-mode prettier-js web-beautify web-mode rjsx-mode js2-refactor js2-mode pyvenv helm-lsp company-lsp lsp-ui lsp-mode helm-projectile flycheck helm-ag ag helm-flx flx org-projectile org-bullets ox-gfm magit all-the-icons solarized-theme dracula-theme gruvbox-theme color-theme-sanityinc-tomorrow better-defaults benchmark-init auto-compile diminish use-package))))
+    (helm-system-packages rg helm-rg nord-theme exec-path-from-shell helpful elfeed dockerfile-mode json-mode yaml-mode fish-mode company-restclient restclient rainbow-delimiters paredit cider clojure-mode npm-mode prettier-js web-beautify web-mode rjsx-mode js2-refactor js2-mode pyvenv helm-lsp company-lsp lsp-ui lsp-mode helm-projectile flycheck helm-ag ag helm-flx flx org-projectile org-bullets ox-gfm magit all-the-icons solarized-theme dracula-theme gruvbox-theme color-theme-sanityinc-tomorrow better-defaults benchmark-init auto-compile diminish use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -236,9 +236,6 @@ More readable.
 #+END_SRC
 ** Capture Templates
 
-These capture templates are no longer up to date with my workflows.
-Need to match beorg capture templates at minimum.
-
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-capture-templates
       '(("t" "Quick TODO" entry
@@ -269,7 +266,7 @@ Need to match beorg capture templates at minimum.
 
 * Helm
 
-Helm for our completion engine - I like both Helm and Ivy, but prefer Helm a little more.
+Helm for our completion engine - I like both Helm and Ivy, but am a little more used to Helm at this point.
 
 First installing related fuzzy match packages so we can configure them alongside the main Helm package.
 
@@ -297,14 +294,18 @@ Now the juice, don yer hats.
     (setq helm-buffer-max-length 48))
 #+END_SRC
 
-Sort of related, let's use =ripgrep= for our searching, and bring in =helm-rg= as well.
+=helm-ag= is a package to use =the_silver_searcher= as your searching tool in Emacs. However, it supports specifying the underlying search tool - so, we use =ripgrep= as it's a little faster.
 
 #+BEGIN_SRC emacs-lisp :results output silent
-  ;; (use-package rg)
-  ;; (use-package helm-rg
-  ;;  :config (setq helm-rg-default-directory 'git-root))
   (use-package ag)
-  (use-package helm-ag)
+  (use-package helm-ag
+    :config (setq helm-ag-base-command "rg --no-heading"))
+#+END_SRC
+
+=helm-system-packages= to get an interface with =brew= (and =portage= if I can get this config working in Gentoo).
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package helm-system-packages)
 #+END_SRC
 
 * Development
@@ -323,9 +324,7 @@ Love me some projectile.
   (use-package projectile
     :diminish projectile-mode
     :config
-    (setq projectile-project-search-path '("~/.emacs.d/"))
-    (if (file-directory-p "~/code/")
-        (add-to-list 'projectile-project-search-path "~/code/"))
+    (setq projectile-project-search-path '("~/.emacs.d/" "~/code/"))
     (projectile-discover-projects-in-search-path)
     (setq-default projectile-mode-line
      '(:eval
@@ -343,7 +342,7 @@ Let's add some Helm to that.
     :bind (("C-c v" . helm-projectile)
            ("C-c f" . helm-projectile-find-file)
            ("C-c b" . helm-projectile-switch-to-buffer)
-           ("C-c s" . helm-projectile-rg)
+           ("C-c s" . helm-do-ag-project-root)
            ("C-c w" . helm-projectile-switch-project)))
 #+END_SRC
 
@@ -384,32 +383,11 @@ Configure LSP - I only use it for Python, currently.
 
     ;; Python pyls configuration
     (add-hook 'python-mode-hook 'lsp)
-    (setq lsp-pyls-configuration-sources ["flake8" "pycodestyle"])
-    (setq lsp-pyls-plugins-flake8-enabled t)
-    (setq lsp-pyls-plugins-pylint-enabled nil)
-    (setq lsp-pyls-plugins-pyflakes-enabled nil)
-    (setq lsp-pyls-plugins-yapf-enabled nil)
-
-    (defun lsp-set-cfg ()
-      (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
-        (lsp--set-configuration lsp-cfg)))
-
-    (add-hook 'lsp-mode-hook 'lsp-set-cfg)
-
-    ;; ;; Python mspyls configuration
-    ;; (defun dub/lsp-setup-python ()
-    ;;   "Set up syntax checker when using mspyls for Python."
-    ;;   (progn
-    ;;     (require 'lsp-python-ms)
-    ;;     (lsp)
-    ;;     (setq-local flycheck-checker 'python-flake8)))
-
-    ;; (use-package lsp-python-ms
-    ;;   :hook (python-mode . dub/lsp-setup-python))
 
     (add-to-list 'lsp-file-watch-ignored "[/\\\\]env$")
     (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.venv$")
-    ;; LSP debugging
+  
+    ;; Optional LSP debugging
     ;; (setq lsp-print-io t)
     ;; (setq lsp-log-io t)
     ;; (setq lsp-trace t)
@@ -419,67 +397,11 @@ Configure LSP - I only use it for Python, currently.
 
 ** Python
 
-Trying out lsp, but keeping elpy config around just in case
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  ;; (use-package elpy
-  ;;  :config
-  ;;  (setq python-shell-interpreter "ipython"
-  ;;        python-shell-interpreter-args "-i --simple-prompt")
-  ;;  (elpy-enable))
-#+END_SRC
-
 Need to use =pyvenv= to activate the relevant virtualenv for your project.
 #+BEGIN_SRC emacs-lisp :results output silent
 (use-package pyvenv)
 #+END_SRC
 
-*** Python utility functions
-
-These are idiomatic to my current work codebase,
-and invoke fabric commands to set environment correctly,
-but feel free to harvest any useful bits.
-
-
-This is a helper function to quickly jump to my primary work codebase.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (defvar olympus-env-dir "/Users/will/code/olympus/env")
-
-  (defun olympus-activate ()
-    (interactive)
-    (pyvenv-activate olympus-env-dir)
-    (setenv "VIRTUAL_ENV" olympus-env-dir)
-    ;; TODO open olympus readme buffer, make primary
-  )
-#+END_SRC
-
-Search and run all tests for function name under point (by naming convention).
-This needs some cleaning up, esp as we pollute the default-directory, but it works for now.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (defun run-pytest-for-word-at-point ()
-    (interactive)  ;; TODO add a test for if (thing-at-point 'word) is nil - run all tests in file
-    (run-pytest-for-word (thing-at-point 'word)))
-
-  (defun run-pytest-for-word (word)
-    (setq default-directory  ;; need to search for tests from top-level dir of project
-          (shell-command-to-string "echo -n (git rev-parse --show-toplevel)"))
-    (let ((process
-           (start-process-shell-command "*pytest*" "*pytest*"
-                                        (concat  ;; trim any leading "_"s
-                                         (if (string-equal (substring word 0 1) "_")
-                                             "ftf test"
-                                           "ftf test_")
-                                         word))))
-      (with-current-buffer (process-buffer process)
-        (display-buffer (current-buffer))
-        (require 'shell)
-        (shell-mode)
-        (set-process-filter process 'comint-output-filter))))  ;; for handling ansi-colors
-
-  (add-hook 'python-mode-hook
-            (lambda () (local-set-key (kbd "C-c t") 'run-pytest-for-word-at-point)))
-#+END_SRC
 ** JavaScript / Typescript / Web
 
 One day in the future I'll start using lsp-mode for JS as well. Since I primarily do backend Pythpon, I haven't put in the time to configure it yet.
@@ -569,32 +491,6 @@ Utility function (hooked into flycheck) to use local eslint when present.
           (setq-local flycheck-javascript-eslint-executable eslint))))
 #+END_SRC
 
-** Clojure (Lisp)
-
-Can't do much without a major mode.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package clojure-mode)
-#+END_SRC
-
-We definitely want CIDER, this is the bread and butter.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package cider)
-#+END_SRC
-
-Company hooks to enable fuzzy completion when in minor mode cider-mode.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
-  (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-#+END_SRC
-
-** Paredit
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package paredit
-    :diminish paredit-mode
-    :hook ((clojure-mode . paredit-mode)
-           (cider-mode . paredit-mode)))
-#+END_SRC
-
 ** RainbowDelimiters
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package rainbow-delimiters
@@ -672,24 +568,6 @@ Almost entirely lifted from Adrien Brochard's [[https://github.com/abrochard/ema
           eshell-prefer-lisp-functions nil
           eshell-destroy-buffer-when-process-dies t))
 #+END_SRC
-** TODO Prompt
-Need to clean this up - using Adrien's, but this isn't my style and doesn't fit my color scheme at all.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq eshell-prompt-function
-        (lambda ()
-          (concat
-           (propertize "┌─[" 'face `(:foreground "green"))
-           (propertize (user-login-name) 'face `(:foreground "red"))
-           (propertize "@" 'face `(:foreground "green"))
-           (propertize (system-name) 'face `(:foreground "lightblue"))
-           (propertize "]──[" 'face `(:foreground "green"))
-           (propertize (format-time-string "%H:%M" (current-time)) 'face `(:foreground "yellow"))
-           (propertize "]──[" 'face `(:foreground "green"))
-           (propertize (concat (eshell/pwd)) 'face `(:foreground "white"))
-           (propertize "]\n" 'face `(:foreground "green"))
-           (propertize "└─>" 'face `(:foreground "green"))
-           (propertize (if (= (user-uid) 0) " # " " $ ") 'face `(:foreground "green")))))
-#+END_SRC
 ** Utility Functions
 *** Clear
 #+BEGIN_SRC emacs-lisp :results output silent
@@ -728,24 +606,6 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
     (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
     (yas-global-mode)
     (global-set-key (kbd "M-/") 'company-yasnippet))
-#+END_SRC
-
-* Elfeed
-
-RSS feeds - should move the feed definitions to another file. Honestly though, I don't use this very much.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-(use-package elfeed
-  :bind ("C-x w" . elfeed)
-  :config
-  (setq elfeed-feeds
-      '(("http://xkcd.com/rss.xml" comic)
-	("https://www.smbc-comics.com/rss.php" comic)
-	("http://reddit.com/r/emacs/.rss" emacs)
-	("http://planet.emacsen.org/atom.xml" emacs)
-	("http://pragmaticemacs.com/feed/" emacs)
-        ("https://blog.jessfraz.com/index.xml" tech)))
-  (setq-default elfeed-search-filter "@1-week-ago +unread"))
 #+END_SRC
 
 * Internal Doc Enhancement

@@ -1,2 +1,9 @@
+transient/
+recentf
 elpa/
 url/
+auto-save-list/
+backups/
+configuration.el
+places
+projectile-bookmarks.eld
