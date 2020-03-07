@@ -99,9 +99,11 @@ I only use GUI emacs - these are baseline modifications.
 #+END_SRC
 ** UI
 *** Theme
-#+BEGIN_SRC emacs-lisp
-  (use-package nord-theme)
-  (load-theme 'nord t)
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package doom-themes
+    :config
+    (load-theme 'doom-one t)
+    (doom-themes-org-config))
 #+END_SRC
 
 *** Font
@@ -274,7 +276,6 @@ See [[https://github.com/xuchunyang/setup-org-protocol-on-mac][Setting Up org-pr
   (server-start)
   (require 'org-protocol)
 #+END_SRC
-
 
 * Helm
 
@@ -489,18 +490,10 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (rjsx-mode . npm-mode))
 #+END_SRC
 
-Utility function (hooked into flycheck) to use local eslint when present.
+=indium= for interactive Node development. Requires =indium= be installed via npm as well.
 #+BEGIN_SRC emacs-lisp :results output silent
-  (defun dub/use-eslint-from-node-modules ()
-      "Set local eslint if available. Credit: jamiecollinson.com/blog/my-emacs-config/#javascript"
-      (let* ((root (locate-dominating-file
-                    (or (buffer-file-name) default-directory)
-                    "node_modules"))
-             (eslint (and root
-                          (expand-file-name "node_modules/eslint/bin/eslint.js"
-                                            root))))
-        (when (and eslint (file-executable-p eslint))
-          (setq-local flycheck-javascript-eslint-executable eslint))))
+  (use-package indium
+    :hook (js2-mode . indium-interaction-mode))
 #+END_SRC
 
 ** RainbowDelimiters
@@ -508,6 +501,7 @@ Utility function (hooked into flycheck) to use local eslint when present.
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
+
 ** Company
 Company-mode quality of life fixes. 
 #+BEGIN_SRC emacs-lisp :results output silent
@@ -634,12 +628,12 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
 * Misc Configuration
 ** exec-path-from-shell (OSX specific)
 #+BEGIN_SRC emacs-lisp :results output silent
-(use-package exec-path-from-shell
-  :config
-  (when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize)
-  (exec-path-from-shell-copy-envs
-   '("PATH"))))
+  (use-package exec-path-from-shell
+    :config
+    (when (memq window-system '(mac ns))
+      (exec-path-from-shell-initialize)
+      (exec-path-from-shell-copy-envs
+       '("PATH"))))
 #+END_SRC
 ** Backups in one folder
 Don't like to pollute the file tree with backups if I don't have to.
