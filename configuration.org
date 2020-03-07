@@ -321,15 +321,7 @@ Now the juice, don yer hats.
   (use-package helm-system-packages)
 #+END_SRC
 
-* Development
-** Flycheck
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package flycheck
-    :ensure t
-    :init (global-flycheck-mode))
-#+END_SRC
-
-** Projectile
+* Projectile
 
 Love me some projectile.
 
@@ -357,6 +349,35 @@ Let's add some Helm to that.
            ("C-c b" . helm-projectile-switch-to-buffer)
            ("C-c s" . helm-do-ag-project-root)
            ("C-c w" . helm-projectile-switch-project)))
+#+END_SRC
+
+=org-projectile= for tracking project-specific todos
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq dub/org-projectile-filename "todos.org")
+
+  (defun dub/goto-project-todos ()
+    (interactive)
+    (let ((maybe-file-path (concat (projectile-project-root) dub/org-projectile-filename)))
+      (when (file-exists-p maybe-file-path)
+        (find-file maybe-file-path))))
+
+  (use-package org-projectile
+    :after org
+    :bind (("C-c n t" . org-projectile-capture-for-current-project)
+           ("C-c p t" . dub/goto-project-todos))
+    :config
+    (progn
+      (org-projectile-per-project)
+      (setq org-projectile-per-project-filepath dub/org-projectile-filename)
+      (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))))
+#+END_SRC
+
+* Development
+** Flycheck
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package flycheck
+    :ensure t
+    :init (global-flycheck-mode))
 #+END_SRC
 
 ** LSP
