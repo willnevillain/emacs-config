@@ -329,8 +329,9 @@ Love me some projectile.
   (use-package projectile
     :diminish projectile-mode
     :config
-    (setq projectile-project-search-path '("~/.emacs.d/" "~/code/"))
+    (setq projectile-project-search-path '("~/code/"))
     (projectile-discover-projects-in-search-path)
+    (add-to-list 'projectile-known-projects "~/.emacs.d/")
     (setq-default projectile-mode-line
      '(:eval
        (if (file-remote-p default-directory)
