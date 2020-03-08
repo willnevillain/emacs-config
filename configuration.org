@@ -483,9 +483,9 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package web-beautify
     :bind (:map web-mode-map
-                ("C-c b" . web-beautify-html)
+                ("C-c j b" . web-beautify-html)
                 :map js2-mode-map
-                ("C-c b" . web-beautify-js)))
+                ("C-c j b" . web-beautify-js)))
 #+END_SRC
 
 =prettier-js= for autoformatting of JS. Need to have =prettier= installed on host via your package manager.
@@ -512,10 +512,12 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (rjsx-mode . npm-mode))
 #+END_SRC
 
-=indium= for interactive Node development. Requires =indium= be installed via npm as well.
+=indium= for interactive Node development. Requires =indium= be installed via npm as well. Need to work on re-binding breakpoint commands as they interfere with my =helm-projectile= ones.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package indium
-    :hook (js2-mode . indium-interaction-mode))
+    :hook (js2-mode . indium-interaction-mode)
+    :config
+    (define-key indium-interaction-mode-map (kbd "C-c b") nil))
 #+END_SRC
 
 ** RainbowDelimiters
@@ -669,7 +671,17 @@ Don't like to pollute the file tree with backups if I don't have to.
   (diminish 'company-mode)
   (diminish 'auto-revert-mode)
 #+END_SRC
+** Generic utility functions
 
+A function to quickly jump to this configuration file.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (defun dub/goto-configuration ()
+    (interactive)
+    (find-file "~/.emacs.d/configuration.org"))
+
+  (global-set-key (kbd "C-c M-c") 'dub/goto-configuration)
+#+END_SRC
 * Unsorted
 Empty!...for now.
 
