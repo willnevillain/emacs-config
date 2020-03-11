@@ -308,7 +308,6 @@ Now the juice, don yer hats.
 #+END_SRC
 
 =helm-ag= is a package to use =the_silver_searcher= as your searching tool in Emacs. However, it supports specifying the underlying search tool - so, we use =ripgrep= as it's a little faster.
-
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package ag)
   (use-package helm-ag
@@ -316,9 +315,13 @@ Now the juice, don yer hats.
 #+END_SRC
 
 =helm-system-packages= to get an interface with =brew= (and =portage= if I can get this config working in Gentoo).
-
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package helm-system-packages)
+#+END_SRC
+
+=helm-xref= to get a helm interface for xref results.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package helm-xref)
 #+END_SRC
 
 * Projectile
@@ -329,9 +332,11 @@ Love me some projectile.
   (use-package projectile
     :diminish projectile-mode
     :config
+    (projectile-mode)
     (setq projectile-project-search-path '("~/code/"))
     (projectile-discover-projects-in-search-path)
     (add-to-list 'projectile-known-projects "~/.emacs.d/")
+    (setq projectile-enable-caching t)
     (setq-default projectile-mode-line
      '(:eval
        (if (file-remote-p default-directory)
@@ -377,8 +382,8 @@ Let's add some Helm to that.
 ** Flycheck
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package flycheck
-    :ensure t
-    :init (global-flycheck-mode))
+    :config
+    (global-flycheck-mode))
 #+END_SRC
 
 ** LSP
@@ -439,8 +444,6 @@ Need to use =pyvenv= to activate the relevant virtualenv for your project.
 
 ** JavaScript / Typescript / Web
 
-One day in the future I'll start using lsp-mode for JS as well. Since I primarily do backend Pythpon, I haven't put in the time to configure it yet.
-
 This config is mostly borrowed from the fantastic Jamie Collinson (their config is linked above).
 
 =js2-mode= is 1 better than builtin JS Mode.
@@ -450,7 +453,9 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     :mode "\\.js\\'"
     :config
     (setq-default js-indent-level 2)
-    (setq-default js2-ignored-warnings '("msg.extra.trailing.comma")))
+    (setq-default js2-ignored-warnings '("msg.extra.trailing.comma"))
+    (setq-default flycheck-disabled-checkers (append flycheck-disabled-checkers '(javascript-jshint)))
+    (flycheck-add-mode 'javascript-eslint 'js2-mode))
 #+END_SRC
 
 =js2-refactor= for some additional refactoring options on top of =js2-mode=.
@@ -463,10 +468,22 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (js2-mode . js2-refactor-mode))
 #+END_SRC
 
+=xref-js2= for jumping to definitions and references in JavaScript.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package xref-js2
+    :config
+    (define-key js2-mode-map (kbd "M-.") nil)
+    (setq xref-js2-search-program 'rg)
+    (add-hook 'js2-mode-hook (lambda ()
+                               (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t))))
+#+END_SRC
+
 =rjsx-mode= for working with JSX.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package rjsx-mode
-    :defer t)
+    :defer t
+    :config
+    (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 #+END_SRC
 
 =web-mode= for html/css.
@@ -479,27 +496,20 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (setq web-mode-markup-indent-offset 2))
 #+END_SRC
 
-=web-beautify= for prettifying html/css by leveraging =js-beautify= - install this with =npm install -g js-beautify=.
+=add-node-modules-path= adds =node_modules/.bin/= directory to buffer local exec-paths.
 #+BEGIN_SRC emacs-lisp :results output silent
-  (use-package web-beautify
-    :bind (:map web-mode-map
-                ("C-c j b" . web-beautify-html)
-                :map js2-mode-map
-                ("C-c j b" . web-beautify-js)))
+  (use-package add-node-modules-path
+    :hook
+    (js2-mode . add-node-modules-path)
+    (rjsx-mode . add-node-modules-path))
 #+END_SRC
 
 =prettier-js= for autoformatting of JS. Need to have =prettier= installed on host via your package manager.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package prettier-js
     :defer t
-    :config
-    (setq prettier-js-args '(
-                             "--trailing-comma" "es5"
-                             "--single-quote" "true"
-                             "--print-width" "100"
-                             ))
     :hook
-    (js2-mode. prettier-js-mode)
+    (js2-mode . prettier-js-mode)
     (rjsx-mode . prettier-js-mode))
 #+END_SRC
 
@@ -529,11 +539,19 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 ** Company
 Company-mode quality of life fixes. 
 #+BEGIN_SRC emacs-lisp :results output silent
-  (setq company-idle-delay 0)
+  (setq company-idle-delay 1)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
   (setq company-global-modes '(not org-mode))
   (global-company-mode)
+#+END_SRC
+
+** Multiple Curors
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package multiple-cursors
+    :bind (("C-c C->" . 'mc/mark-all-like-this)
+           ("C->" . 'mc/mark-next-like-this)
+           ("C-<" . 'mc/mark-previous-like-this)))
 #+END_SRC
 
 ** Development adjacent
