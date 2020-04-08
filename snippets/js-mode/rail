@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: refac await in loop
+# key: rail
+# --
+// REFAC: no await in loop

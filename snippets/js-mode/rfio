@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: refac for in/of loop issues
+# key: rfio
+# --
+// REFAC: for in/of loop issues
