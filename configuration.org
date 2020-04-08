@@ -104,6 +104,10 @@ I only use GUI emacs - these are baseline modifications.
     :config
     (load-theme 'doom-one t)
     (doom-themes-org-config))
+
+  (use-package nord-theme
+    :config
+    (load-theme 'nord t))
 #+END_SRC
 
 *** Font
@@ -336,6 +340,7 @@ Love me some projectile.
     (setq projectile-project-search-path '("~/code/"))
     (projectile-discover-projects-in-search-path)
     (add-to-list 'projectile-known-projects "~/.emacs.d/")
+    (add-to-list 'projectile-known-projects "~/Dropbox/org/")
     (setq projectile-enable-caching t)
     (setq-default projectile-mode-line
      '(:eval
@@ -539,7 +544,7 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
 ** Company
 Company-mode quality of life fixes. 
 #+BEGIN_SRC emacs-lisp :results output silent
-  (setq company-idle-delay 1)
+  (setq company-idle-delay 0.3)
   (setq company-minimum-prefix-length 1)
   (setq company-selection-wrap-around t)
   (setq company-global-modes '(not org-mode))
