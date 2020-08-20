@@ -42,10 +42,20 @@
     ("7f791f743870983b9bb90c8285e1e0ba1bf1ea6e9c9a02c60335899ba20f3c94" "7f6d4aebcc44c264a64e714c3d9d1e903284305fd7e319e7cb73345a9994f5ef" default)))
  '(package-selected-packages
    (quote
-    (helm-xref xref-js2 add-node-modules-path quelpa-use-package quelpa dotenv doom-themes night-owl-theme panda-theme atom-one-dark-theme zenburn-theme nimbus-theme darktooth-theme indium helm-system-packages rg helm-rg nord-theme exec-path-from-shell helpful elfeed dockerfile-mode json-mode yaml-mode fish-mode company-restclient restclient rainbow-delimiters paredit cider clojure-mode npm-mode prettier-js web-beautify web-mode rjsx-mode js2-refactor js2-mode pyvenv helm-lsp company-lsp lsp-ui lsp-mode helm-projectile flycheck helm-ag ag helm-flx flx org-projectile org-bullets ox-gfm magit all-the-icons solarized-theme dracula-theme gruvbox-theme color-theme-sanityinc-tomorrow better-defaults benchmark-init auto-compile diminish use-package)))
+    (sql-indent kubel jest flycheck-jest helm-xref xref-js2 add-node-modules-path quelpa-use-package quelpa dotenv doom-themes night-owl-theme panda-theme atom-one-dark-theme zenburn-theme nimbus-theme darktooth-theme indium helm-system-packages rg helm-rg nord-theme exec-path-from-shell helpful elfeed dockerfile-mode json-mode yaml-mode fish-mode company-restclient restclient rainbow-delimiters paredit cider clojure-mode npm-mode prettier-js web-beautify web-mode rjsx-mode js2-refactor js2-mode pyvenv helm-lsp company-lsp lsp-ui lsp-mode helm-projectile flycheck helm-ag ag helm-flx flx org-projectile org-bullets ox-gfm magit all-the-icons solarized-theme dracula-theme gruvbox-theme color-theme-sanityinc-tomorrow better-defaults benchmark-init auto-compile diminish use-package)))
  '(safe-local-variable-values
    (quote
-    ((eval progn
+    ((eval
+      (setq tide-tsserver-exectuable
+            (concat
+             (locate-dominating-file default-directory ".dir-locals.el")
+             "node_modules/.bin/tsserver")))
+     (eval
+      (setq tide-tscompiler-exectuable
+            (concat
+             (locate-dominating-file default-directory ".dir-locals.el")
+             "node_modules/.bin/tsc")))
+     (eval progn
            (require
             (quote f))
            (require

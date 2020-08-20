@@ -585,6 +585,33 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (define-key indium-interaction-mode-map (kbd "C-c b") nil))
 #+END_SRC
 
+** SQL
+
+=sql-indent= for indenting SQL.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package sql-indent
+    :hook (sql-mode . sqlind-minor-mode))
+#+END_SRC
+
+** YAML
+
+First is the core =yaml-mode=.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package yaml-mode
+    :config
+    (add-hook 'yaml-mode-hook 'flycheck-mode))
+#+END_SRC
+
+=flycheck-yamllint= for linting YAML with flycheck.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package flycheck-yamllint
+    :defer t
+    :init
+    (progn
+      (eval-after-load 'flycheck
+        '(add-hook 'flycheck-mode-hook 'flycheck-yamllint-setup))))
+#+END_SRC
+
 ** RainbowDelimiters
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package rainbow-delimiters
@@ -634,14 +661,6 @@ For editing Fish shell files - this may go away if I ever have the courage to fu
 (use-package fish-mode)
 #+END_SRC
 
-*** Yaml Mode
-
-Who doesn't have to edit some yaml in this day and age?
-
-#+BEGIN_SRC emacs-lisp :results output silent
-(use-package yaml-mode)
-#+END_SRC
-
 *** JSON Mode
 
 This feels like the "don't you guys have phones?" of major modes.
@@ -651,11 +670,14 @@ This feels like the "don't you guys have phones?" of major modes.
 #+END_SRC
 
 *** Dockerfile Mode
-
-I don't often edit Dockerfiles, but when I do...
-
 #+BEGIN_SRC emacs-lisp :results output silent
 (use-package dockerfile-mode)
+#+END_SRC
+
+** Kubel
+=kubel= for managing Kubernetes within Emacs - major props to Adrien for this.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package kubel)
 #+END_SRC
 
 * Eshell
