@@ -105,10 +105,6 @@ I only use GUI emacs - these are baseline modifications.
     :config
     (load-theme 'doom-one t)
     (doom-themes-org-config))
-
-  (use-package nord-theme
-    :config
-    (load-theme 'nord t))
 #+END_SRC
 
 *** Font
@@ -467,6 +463,24 @@ Need to use =pyvenv= to activate the relevant virtualenv for your project.
 
 This config is mostly borrowed from the fantastic Jamie Collinson (their config is linked above).
 
+=tide= is used for TypeScript.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package tide)
+
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+  (setq-default typescript-indent-level 4)
+#+END_SRC
+
 =js2-mode= is 1 better than builtin JS Mode.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package js2-mode
@@ -517,12 +531,28 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (setq web-mode-markup-indent-offset 2))
 #+END_SRC
 
+=jest= is a porcelain to run Jest in Emacs.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package jest
+    :hook (js2-mode . jest-minor-mode))
+#+END_SRC
+
+=flycheck-jest= as a Flycheck extension for Jest testing framework.
+#+BEGIN_SRC emacs-lisp :results output silentn
+  (use-package flycheck-jest
+    :config
+    (flycheck-jest-setup))
+#+END_SRC
+
 =add-node-modules-path= adds =node_modules/.bin/= directory to buffer local exec-paths.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package add-node-modules-path
     :hook
     (js2-mode . add-node-modules-path)
-    (rjsx-mode . add-node-modules-path))
+    (rjsx-mode . add-node-modules-path)
+    (typescript-mode . add-node-modules-path)
+    (yaml-mode . add-node-modules-path)
+    (json-mode . add-node-modules-path))
 #+END_SRC
 
 =prettier-js= for autoformatting of JS. Need to have =prettier= installed on host via your package manager.
@@ -531,7 +561,10 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     :defer t
     :hook
     (js2-mode . prettier-js-mode)
-    (rjsx-mode . prettier-js-mode))
+    (rjsx-mode . prettier-js-mode)
+    (typescript-mode . prettier-js-mode)
+    (yaml-mode . prettier-js-mode)
+    (json-mode . prettier-js-mode))
 #+END_SRC
 
 =npm-mode= is a really nifty little package. Command map [[https://github.com/mojochao/npm-mode#command-keymap][here]].
@@ -540,7 +573,8 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     :defer t
     :hook
     (js2-mode . npm-mode)
-    (rjsx-mode . npm-mode))
+    (rjsx-mode . npm-mode)
+    (typescript-mode . npm-mode))
 #+END_SRC
 
 =indium= for interactive Node development. Requires =indium= be installed via npm as well. Need to work on re-binding breakpoint commands as they interfere with my =helm-projectile= ones.
