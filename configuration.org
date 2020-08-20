@@ -74,6 +74,7 @@ My main use case for this is in order to use org-protocol to capture from web br
 #+BEGIN_SRC emacs-lisp :results output silent
   (server-start)
 #+END_SRC
+
 * UI/UX
 I only use GUI emacs - these are baseline modifications.
 ** Windows, Frames and Buffers
@@ -137,14 +138,17 @@ The number of times I've fat fingered C-x C-c...
 #+BEGIN_SRC emacs-lisp
 (setq confirm-kill-emacs 'y-or-n-p)
 #+END_SRC
+
 *** Accept "y" and "n" in place of "yes" and "no"
 #+BEGIN_SRC emacs-lisp
 (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
+
 *** Auto-indent on RET rather than just C-j
 #+BEGIN_SRC emacs-lisp
 (define-key global-map (kbd "RET") 'newline-and-indent)
 #+END_SRC
+
 * Personal Information
 #+BEGIN_SRC emacs-lisp
   (setq user-full-name "Will Neville"
@@ -182,6 +186,18 @@ I like to log completion time of repeated tasks.
 
 #+BEGIN_SRC emacs-lisp :results output silent
   (setq org-log-repeat "time")
+#+END_SRC
+
+Hide scheduled items from agenda view if they are done.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-agenda-skip-scheduled-if-done t)
+#+END_SRC
+
+Start showing upcoming deadlines in agenda 4 days in advance as opposed to default 14.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-deadline-warning-days 4)
 #+END_SRC
 
 I keep all my org stuff in Dropbox. Experimenting with =beorg= on iOS,
@@ -621,6 +637,7 @@ Almost entirely lifted from Adrien Brochard's [[https://github.com/abrochard/ema
           eshell-prefer-lisp-functions nil
           eshell-destroy-buffer-when-process-dies t))
 #+END_SRC
+
 ** Utility Functions
 *** Clear
 #+BEGIN_SRC emacs-lisp :results output silent
@@ -628,17 +645,20 @@ Almost entirely lifted from Adrien Brochard's [[https://github.com/abrochard/ema
     (let ((inhibit-read-only t))
       (erase-buffer)))
 #+END_SRC
+
 *** Close
 #+BEGIN_SRC emacs-lisp :results output silent
   (defun eshell/close ()
     (delete-window))
 #+END_SRC
+
 *** Helm history
 #+BEGIN_SRC emacs-lisp :results output silent
   (add-hook 'eshell-mode-hook
             (lambda ()
               (define-key eshell-mode-map (kbd "M-r") 'helm-eshell-history)))
 #+END_SRC
+
 *** Close window on exit
 #+BEGIN_SRC emacs-lisp :results output silent
   (defun eshell-pop--kill-and-delete-window ()
