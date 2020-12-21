@@ -1,0 +1,668 @@
+#+TITLE: Emacs Config
+#+AUTHOR: wneville
+#+OPTIONS: toc:nil num:nil
+
+* Required external dependencies
+
+For this configuration to work correctly, the following dependencies must be installed on your system.
+
+- ripgrep
+- preferable: project local installations of eslint for JS / TS projects
+- preferable: project local installations of prettier for JS / TS projects
+
+* Add package repositories
+
+#+begin_src emacs-lisp
+  (require 'package)
+  (setq package-enable-at-startup nil)
+  (setq package-archives '(("melpa" . "http://melpa.org/packages/")))
+  (package-initialize)
+#+end_src
+
+* Garbage collection tuning
+
+Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#garbage-collection-tuning][abrochard config]].
+
+#+begin_src emacs-lisp
+  (defmacro k-time (&rest body)
+    "Measure and return the time it takes evaluating BODY."
+    `(let ((time (current-time)))
+       ,@body
+       (float-time (time-since time))))
+
+  ;; When idle for 30sec run the GC no matter what.
+  (defvar k-gc-timer
+    (run-with-idle-timer 30 t
+                         (lambda ()
+                           (message "Garbage Collector has run for %.06fsec"
+                                    (k-time (garbage-collect))))))
+
+  ;; Set garbage collection threshold to 1GB.
+  (setq gc-cons-threshold #x40000000)
+
+  ;; Set garbage collection to 20% of heap
+  (setq gc-cons-percentage 0.2)
+#+end_src
+
+* Automatic package installation via =use-package=
+
+** Install =use-package= and dependencies
+
+[[https://github.com/jwiegley/use-package][use-package]] is a macro that simplifies the syntax for installing and configuring packages.
+
+[[https://github.com/myrjola/diminish.el][diminish]] hides minor-modes from the modeline. =use-package= has support for invoking =diminish= via the =:diminish= keyword.
+
+#+begin_src emacs-lisp
+  (mapc
+   (lambda (package)
+     (unless (package-installed-p package)
+       (progn
+         (package-refresh-contents)
+         (package-install package))))
+   '(use-package diminish))
+#+end_src
+
+** Trigger =use-package=
+
+=use-package-always-ensure= set to =t= is equivalent to all =use-package= declaractions having the =:ensure= keyword set to =t=.
+=:ensure= causes packages to be installed automatically if not already present on system.
+
+#+begin_src emacs-lisp
+  (require 'use-package)
+  (require 'diminish)
+
+  (setq use-package-always-ensure t)
+#+end_src
+
+* Install =better-defaults=
+
+[[https://git.sr.ht/~technomancy/better-defaults][better-defaults]] provides a set of packages and configuration updates to add "better" defaults.
+I've used this package for a bit and have grown accustomed to most of these defaults.
+
+The main things I notably get from this are:
+- Disable toolbar, menu bar and scroll bar
+- =uniquify= library enabled and configured to add directory names to files if the names are not unique (default behavior is to append =<n>= to the end of file names)
+- =show-paren-mode= enabled by default
+- More extensive =apropros= searches
+- =indent-tabs=mode= defaults to nil - spaces instead of tabs
+
+Will maybe pull out these specific changes into dedicated config to avoid risk a new version of =better-defaults= changing some behavior I'm used to, but it should be fine.
+
+#+begin_src emacs-lisp
+  (use-package better-defaults)
+#+end_src
+
+* UI / UX
+
+** Startup UI / UX behavior
+
+Start in full screen by default with =toggle-frame-maximized=.
+
+#+begin_src emacs-lisp
+  (toggle-frame-maximized)
+#+end_src
+
+Inhibit startup message and have scratch buffer empty by default.
+
+#+begin_src emacs-lisp
+  (setq initial-scratch-message nil)
+  (setq inhibit-startup-message t)
+#+end_src
+
+** General UI / UX tweaks
+
+Do not make an audible noise when attempting to do something invalid.
+
+#+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+end_src
+
+Show column numbers in the modeline, and show line numbers on the left side.
+
+#+begin_src emacs-lisp
+  (setq column-number-mode t)
+  (global-display-line-numbers-mode) 
+#+end_src
+
+Ask for confirmation before quitting - remove pain of accidental =C-x C-c= fat fingers.
+
+#+begin_src emacs-lisp
+  (setq confirm-kill-emacs 'y-or-n-p)
+#+end_src
+
+Accept =y= and =n= in place of =yes= and =no= respectively.
+
+#+begin_src emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+Auto-indent on =RET= in addition to usual =C-j=.
+
+#+begin_src emacs-lisp
+  (define-key global-map (kbd "RET") 'newline-and-indent)
+#+end_src
+
+** Theme
+
+[[https://draculatheme.com/emacs][dracula]] is a stylish and spooky dark theme.
+
+#+begin_src emacs-lisp
+  (use-package dracula-theme
+    :config
+    (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
+#+end_src
+
+Load the theme.
+
+#+begin_src emacs-lisp
+  (load-theme 'dracula t)
+#+end_src
+
+** Font
+
+Use the [[https://sourcefoundry.org/hack/][Hack]] font if installed on the system.
+
+#+begin_src emacs-lisp
+  (if (condition-case nil
+          (x-list-fonts "Hack")
+        (error nil))
+      (progn
+        (add-to-list 'default-frame-alist '(font . "Hack-12"))
+        (set-face-attribute 'default nil :font "Hack-12")))
+#+end_src
+
+* Configure =helm=
+
+[[https://github.com/emacs-helm/helm][helm]] and similar projects can be hard to describe; =helm= describes itself as an "incremental completion and selection narrowing framework".
+
+In as crude of laymans terms as possible, when you do something that returns many results, =helm= makes it easier to find the result for which you are looking.
+
+** Fuzzy match package dependencies
+
+[[https://github.com/lewang/flx][flx]] provides Sublime style fuzzy text matching.
+We can get =helm= support for =flx= via [[https://github.com/PythonNut/helm-flx][helm-flx]].
+
+#+begin_src emacs-lisp
+  (use-package flx)
+  (use-package helm-flx)
+#+end_src
+
+** Install =helm=, rebind common functions, fuzzy match everywhere
+
+#+begin_src emacs-lisp
+  (use-package helm
+    :demand ;; Do not defer regardless of circumstances
+    :diminish helm-mode
+    :bind (("M-x" . helm-M-x) ;; Helm interactive function completion
+           ("M-y" . helm-show-kill-ring) ;; Helm kill ring
+           ("C-x b" . helm-mini) ;; Helm buffers list
+           ("C-x C-b" . helm-mini) ;; Almost every time I hit C-x C-b I meant to hit C-x b
+           ("C-x C-f" . helm-find-files)) ;; Helm find files
+    :config
+    (helm-mode 1)
+    (helm-flx-mode 1)
+    (setq helm-mode-fuzzy-match t   ;; Fuzzy match config
+          helm-buffers-fuzzy-matching t
+          helm-lisp-fuzzy-completion t
+          helm-locate-fuzzy-match t
+          helm-M-x-fuzzy-match t
+          helm-recentf-fuzzy-match t)
+    (setq helm-buffer-max-length 48))
+#+end_src
+
+** Configure =ripgrep= via =helm-ag= as search tool
+
+[[https://github.com/emacsorphanage/helm-ag][helm-ag]] allows using [[https://github.com/ggreer/the_silver_searcher][The Silver Searcher]] as your underlying search tool in place of the default (probably =grep=).
+
+However, the project [[https://github.com/BurntSushi/ripgrep][ripgrep]] exisxts, and is currently the fastest search tool available.
+
+There exists a project [[https://github.com/cosmicexplorer/helm-rg][helm-rg]] to provide a =helm= interface for =ripgrep= specifically, but for whatever reason I've run into issues with this.
+
+As a workaround, I use =helm-ag= and configure base command to run the =ripgrep= executable, which has worked perfectly.
+
+#+begin_src emacs-lisp
+  (use-package ag)
+  (use-package helm-ag
+    :config
+    (setq helm-ag-base-command "rg --no-heading"))
+#+end_src
+
+** Install =helm-xref=
+
+[[https://github.com/brotzeit/helm-xref][helm-xref]] provides a =helm= interface for results of the built-in [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]].
+
+#+begin_src emacs-lisp
+  (use-package helm-xref)
+
+#+end_src
+
+* Configure =org-mode=
+
+[[https://orgmode.org/][org-mode]] is a major mode that provides a plain text markup language - that doesn't sound that special in essence, but the ecosystem around org-mode is out of control.
+
+You can manage novel planning, spreadsheets, personal and project TODO management, write research papers...whatever you want basically, and org-mode has a way to make it easier.
+
+The current state of my =org-mode= config is very pared down as I manage all my TODOs in [[https://todoist.com/][Todoist]] and have no plans to migrate off of it anytime soon.
+
+Historically I have managed /_everything_/ in org files, but there were occasional syncing or merge quirks that caused me to lose enough data that I migrated off of it.
+
+This configuration will grow depending on my increased usage of =org-mode=.
+
+** Set environment - important keybindings and =org-indent-mode= hook
+
+#+begin_src emacs-lisp
+  (use-package org
+    :bind (("C-c l" . org-store-link)
+           ("C-c a" . org-agenda)
+           ("C-c c" . org-capture))
+    :hook (org-mode . org-indent-mode))
+#+end_src
+
+** Set org file location
+
+I keep all org files in Dropbox.
+
+#+begin_src emacs-lisp
+  (setq org-directory "~/Dropbox/org")
+#+end_src
+
+Likewise, agenda files will live in Dropbox.
+
+#+begin_src emacs-lisp
+  (setq org-agenda-files '("~/Dropbox/org"))
+#+end_src
+
+** Timed task configuration tweaks
+
+Log completion time of repeated tasks.
+
+#+begin_src emacs-lisp
+  (setq org-log-repeat "time")
+#+end_src
+
+Hide scheduled items from agenda view if they're already done.
+
+#+begin_src emacs-lisp
+  (setq org-agenda-skip-scheduled-if-done t)
+#+end_src
+
+Start showing upcoming deadlins in agenda 5 days in advance - default of 14 days is too much for me.
+
+#+begin_src emacs-lisp
+  (setq org-deadline-warning-days 5)
+#+end_src
+
+* Configure =projectile=
+
+[[https://github.com/bbatsov/projectile][projectile]] is a very powerful library for interacting with multiple projects.
+It provides features and functions that operate on the project level, such as jumping to a file in a project, jump to file at point in project, search in project, etc.
+
+** Install =projectile= and core configuration
+
+#+begin_src emacs-lisp
+  (use-package projectile
+    :diminish projectile-mode
+    :config
+    (projectile-mode)
+    (setq projectile-project-search-path '("~/code")) ;; Specify dir(s) to search for projects
+    (projectile-discover-projects-in-search-path) ;; Trigger project discovery
+    (setq projectile-enable-caching t) ;; Cache search results
+    (add-to-list 'projectile-globally-ignored-directories "node_modules")) ;; Never search in
+#+end_src
+
+** Integrate with =helm=
+
+[[https://github.com/bbatsov/helm-projectile][helm-projectile]] provides =helm= integration for =projectile= - it's written by the same author as =projectile=, the prolific [[https://github.com/bbatsov][Bozhidar Batsov]].
+
+#+begin_src emacs-lisp
+  (use-package helm-projectile
+    :bind (("C-c v" . helm-projectile)
+           ("C-c f" . helm-projectile-find-file)
+           ("C-c b" . helm-projectile-switch-to-buffer)
+           ("C-c s" . helm-do-ag-project-root)
+           ("C-c w" . helm-projectile-switch-project)))
+#+end_src
+
+* Cofigure =magit=
+
+#+begin_src emacs-lisp
+  (use-package magit
+    :bind ("C-x g" . magit-status))
+#+end_src
+
+* Programming environment
+
+Anything related to a specific programming language, or programming major mode adjacent, lives here.
+
+** Configure =flycheck=
+
+[[https://github.com/flycheck/flycheck][flycheck]] provides on the fly syntax checking; it supports [[https://www.flycheck.org/en/latest/languages.html][many languages and checkers]].
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :config
+    (global-flycheck-mode))
+#+end_src
+
+** Configure =company=
+
+[[https://company-mode.github.io/][company]] is an in-buffer text completion framework; put more simply, when you're typing something, company will create a dropdown of possible options for what you're typing.
+
+#+begin_src emacs-lisp
+  (use-package company
+    :diminish company-mode
+    :config
+    (global-company-mode)
+    (setq company-idle-delay 0.3 ;; show candidates 0.3 sec after idle from typing
+          company-minimum-prefix-length 1 ;; show candidates as early as 1 character
+          company-selection-wrap-around t ;; if you scroll past last/first candidate, wrap around
+          global-company-modes '(not org-mode))) ;; disable company for modes
+#+end_src
+
+[[https://github.com/company-mode/company-quickhelp][company-quickhelp]] displays a pop-up when idling on a company candidate with documentation on the candidate.
+
+#+begin_src emacs-lisp
+  (use-package company-quickhelp
+    :config
+    (setq company-quickhelp-delay 1.2)
+    (company-quickhelp-mode))
+#+end_src
+
+** Configure support for TypeScript + ecosystem
+
+Currently I only do Backend Node.js TypeScript programming - as a result there is slim support for anything pertaining to the web or vanilla JS at this time.
+
+*** Install and configure =tide=
+
+[[https://github.com/ananthakumaran/tide][tide]] is an IDE for TypeScript for Emacs.
+
+#+begin_src emacs-lisp
+  (use-package tide)
+
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
+    (setq flycheck-check-syntax-automatically
+          '(save idle-change mode-enabled new-line)) ;; Configure aggressive syntax checking cadence
+    (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
+    (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
+    (setq tide-tscompiler-executable "./node_modules/.bin/tsc")
+    (setq tide-tsserver-executable "./node_modules/.bin/tsserver")
+    (setq flycheck-checker 'javascript-eslint)
+    (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
+    (setq flycheck-eslint-args '("--cache \\*\\*/\\_.ts")))
+
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+#+end_src
+
+*** Add node_modules =.bin= folder to =exec-path=
+
+[[https://github.com/codesuki/add-node-modules-path][add-node-modules-path]] provides a function that searches current file parent directories for a =node_modules/.bin/= folder.
+
+This allows using project based installations of tools like =eslint= and =prettier=, which is my preference for controlling versions.
+
+#+begin_src emacs-lisp
+  (use-package add-node-modules-path
+    :hook (typescript-mode . add-node-modules-path))
+#+end_src
+
+*** Install and configure =prettier-js=
+
+[[https://github.com/prettier/prettier-emacs][prettier-js]] provides formatting support via the [[https://prettier.io/][prettier]] code formatter.
+
+=tide= offers formatting support that aligns with TypeScript standards, but I work with a few codebases that prefer local =prettier= configs.
+
+#+begin_src emacs-lisp
+  (use-package prettier-js
+    :hook (typescript-mode . prettier-js-mode))
+#+end_src
+
+** Configure development adjacent major modes
+
+*** Install =yaml-mode=
+
+[[https://github.com/yoshiki/yaml-mode][yaml-mode]] provides YAML file editing support.
+
+#+begin_src emacs-lisp
+  (use-package yaml-mode)
+#+end_src
+
+*** Install =json-mode=
+
+[[https://github.com/joshwnj/json-mode][json-mode]] provides JSON file editing support.
+
+#+begin_src emacs-lisp
+  (use-package json-mode)
+#+end_src
+
+*** Install =dockerfile-mode=
+
+[[https://github.com/spotify/dockerfile-mode][dockerfile-mode]] provides Dockerfile editing support (and image building as well).
+Somewhat of a surprise to me, this is maintained by Spotify.
+
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode)
+#+end_src
+
+** Configure programming related UI packages
+
+*** Install =git-gutter=
+
+[[https://github.com/emacsorphanage/git-gutter][git-gutter]] provides visual indicators in the left gutter of a buffer of git changes.
+
+#+begin_src emacs-lisp
+  (use-package git-gutter
+    :diminish git-gutter-mode
+    :config (global-git-gutter-mode 1))
+#+end_src
+
+* Infrastructure and application management
+
+Anything related to connecting to, declaring configuration for or otherwise managing live infrastructure or applications.
+
+** Configure =kubel=
+
+[[https://github.com/abrochard/kubel][kubel]] allows controlling Kubernetes with limited permissions through Emacs.
+
+The [[https://github.com/abrochard][author]] gave an interesting talk about how the extension was born and built, which I encourage you to watch [[https://www.youtube.com/watch?v=w3krYEeqnyk][here]].
+
+#+begin_src emacs-lisp
+  (use-package kubel)
+#+end_src
+
+* Configure =eshell=
+
+[[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][eshell]] is a shell-like command interpreter implemented entirely in Emacs Lisp.
+
+=eshell= is an interesting beast that I won't say I've come close to taming.
+
+Recommended reading / viewing to demystify =eshell=:
+- [[https://masteringemacs.org/article/complete-guide-mastering-eshell][Mastering Emacs article "Mastering Eshell"]]
+- [[https://www.youtube.com/watch?v=RhYNu6i_uY4][Howard Abrams London Emacs Meetup talk "Introduction to EShell"]]
+
+** Package configuration
+
+#+begin_src emacs-lisp
+  (use-package eshell
+    :config
+    (setq eshell-scroll-to-bottom-on-input 'all ;; Scroll to bottom of buffer when entering input
+          eshell-error-if-no-glob t ;; Error if glob pattern does not match
+          eshell-hist-ignoredups t ;; ???, but a lot of people have it
+          eshell-save-history-on-exit t ;; Save history of eshell process on exist
+          eshell-prefer-lisp-functions nil ;; Prefer external commands to Lisp functions
+          eshell-destroy-buffer-when-process-dies t)) ;; When eshell process exists, destroy buffer
+#+end_src
+
+** Utility functions
+
+Defined functions prefaced with =eshell/= should be invokable using everything after the =/= in eshell. 
+
+#+begin_src emacs-lisp
+  (defun eshell/clear ()
+    "Clear eshell buffer."
+    (let ((inhibit-read-only t))
+      (erase-buffer)))
+
+  (defun eshell/close ()
+    "Close eshell window."
+    (delete-window))
+#+end_src
+
+=eshell= related interactive functions defined here.
+
+#+begin_src emacs-lisp
+  (defun eshell-here ()
+    "Opens up a new shell in the directory associated with the
+      current buffer's file. The eshell is renamed to match that
+      directory to make multiple eshell windows easier."
+    (interactive)
+    (let* ((height (/ (window-total-height) 3)))
+      (split-window-vertically (- height))
+      (other-window 1)
+      (eshell "new")
+      (insert (concat "ls"))
+      (eshell-send-input)))
+
+  (bind-key "C-!" 'eshell-here)
+#+end_src
+
+Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
+
+#+begin_src emacs-lisp
+  (add-hook 'eshell-mode-hook ;; Bind key to view preconfigured Helm view of eshell history
+            (lambda ()
+              (define-key eshell-mode-map (kbd "M-r") 'helm-eshell-history)))
+
+  (defun eshell-pop--kill-and-delete-window ()
+    "Used on eshell exit hook, will delete the window if not the only one in the frame"
+    (unless (one-window-p)
+      (delete-window)))
+
+  (add-hook 'eshell-exit-hook 'eshell-pop--kill-and-delete-window)
+#+end_src
+
+** Visual command and subcommand definitions
+
+=eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
+
+#+begin_src emacs-lisp
+  (setq eshell-visual-command '("htop" "top" "less" "more" "screen"))
+  (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh"))
+#+end_src
+
+Related: set Unix Pager to be the =cat= command.
+
+#+begin_src emacs-lisp
+  (setenv "PAGER" "cat")
+#+end_src
+
+* Configure =yasnippet=
+
+[[https://github.com/joaotavora/yasnippet][yasnippet]] is a template and expansion system for Emacs.
+
+Snippets from the [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets community library]] are loaded alongside my own defined snippets.
+
+My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs.d/yasnippet-snippets=.
+
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :diminish yas-minor-mode
+    :config
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
+    (yas-global-mode)
+    (global-set-key (kbd "M-/") 'company-yasnippet))
+#+end_src
+
+* Configure blogging tool(s)
+
+[[https://github.com/masasam/emacs-easy-hugo][easy-hugo]] is a package that makes it easier to work with the [[https://gohugo.io/][hugo]] static site generator.
+
+#+begin_src emacs-lisp
+  (use-package easy-hugo
+    :init
+    (setq easy-hugo-basedir "~/code/blog/")
+    (setq easy-hugo-url "https://wneville.github.io")
+    (setq easy-hugo-postdir "content/blog")
+    (setq easy-hugo-default-ext ".org"))
+#+end_src
+
+* Global utility functions
+
+Any utility functions that are used at a global level go here.
+
+** Jump to this configuration file
+
+#+begin_src emacs-lisp
+  (defun wneville/goto-configuraion ()
+    (interactive)
+    (find-file "~/.emacs.d/config.org"))
+
+  (global-set-key (kbd "C-c M-c") 'wneville/goto-configuration)
+#+end_src
+
+* Miscellaney
+
+Configuration that doesn't really fit elsewhere or deserve a top level heading go here.
+
+** Configure =helpful= for better Emacs docs
+
+[[https://github.com/Wilfred/helpful][helpful]] provides much more context and detail in the help buffer.
+
+We rebind all the command help keybinds to their =helpful= equivalent.
+
+#+begin_src emacs-lisp
+  (use-package helpful
+    :bind (("C-h f" . helpful-callable)
+           ("C-h v" . helpful-variable)
+           ("C-h k" . helpful-key)
+           ("C-h F" . helpful-function)
+           ("C-h C" . helpful-command)))
+#+end_src
+
+** Configure =exec-path-from-shell= (OS X)
+
+[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]] copies specified environment variables from your shell to Emacs.
+
+On OS X in particular, Emacs launched as a GUI does not inherit all the shell env vars.
+
+#+begin_src emacs-lisp
+  (setq exec-path-from-shell-arguments nil) ;; Suppress default arg to open interactive shell
+
+  (use-package exec-path-from-shell
+    :config
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+#+end_src 
+
+** Configure backups to go into one folder
+
+I dislike polluting the file tree with Emacs backups - I put them all in =~/.emacs.d/backups=.
+
+#+begin_src emacs-lisp
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+#+end_src
+
+** Configure diminished minor modes
+
+There are a few minor modes not specifically configured in this file that I like to diminish.
+
+#+begin_src emacs-lisp
+  (diminish 'abbrev-mode)
+  (diminish 'auto-revert-mode)
+  (diminish 'eldoc-mode)
+#+end_src
+
+* Configure and load custom file
+
+By default, Emacs places anything customized via =customize= at the bottom of =init.el=.
+
+Prefer to place all this cruft in a specific file.
+
+#+begin_src emacs-lisp
+  (setq custom-file
+        (expand-file-name "custom.el" user-emacs-directory))
+  (load custom-file)
+#+end_src
+

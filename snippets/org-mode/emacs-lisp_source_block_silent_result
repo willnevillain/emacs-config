@@ -1,5 +1,7 @@
 # -*- mode: snippet -*-
-# name: emacs-lisp source block silent result
-# key: sel
+# name: elisp src block default tangle
+# key: elispsrc
 # --
-emacs-lisp :results output silent
+#+begin_src emacs-lisp
+$0
+#+end_src

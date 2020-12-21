@@ -75,6 +75,15 @@ My main use case for this is in order to use org-protocol to capture from web br
   (server-start)
 #+END_SRC
 
+** Path initialization (exec-path-from-shell)
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns x))
+    :config
+    (setq exec-path-from-shell-variables '("PATH"))
+    (exec-path-from-shell-initialize))
+#+END_SRC
+
 * UI/UX
 I only use GUI emacs - these are baseline modifications.
 ** Windows, Frames and Buffers
@@ -111,7 +120,7 @@ I only use GUI emacs - these are baseline modifications.
 
 Use Hack font if installed.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (if (condition-case nil
         (x-list-fonts "Hack")
       (error nil))
@@ -120,14 +129,25 @@ Use Hack font if installed.
       (set-face-attribute 'default nil :font "Hack-12")))
 #+END_SRC
 
-*** All the icons!
-all-the-icons makes neotree look cooler. Workaround to install fonts if not already installed.
-#+BEGIN_SRC emacs-lisp
-(use-package all-the-icons
-  :config (lambda ()  ;; workaround to only install fonts if not already installed
-            (unless (member "all-the-icons" (font-family-list))
-              (all-the-icons-install-fonts t))))
+*** Treemacs
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package treemacs
+    :config
+    (progn
+      (setq treemacs-is-never-other-window t)
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t))
+    :bind
+    (:map global-map
+          ("M-0" . treemacs-select-window)
+          ("C-x t t" . treemacs)
+          ("C-x t C-t" . treemacs-find-file)))
+  (use-package treemacs-projectile
+    :after treemacs projectile)
+
+  (treemacs) ;; start with treemacs enabled
 #+END_SRC
+
 ** UX
 *** Ask for confirmation before quitting
 The number of times I've fat fingered C-x C-c...
@@ -162,135 +182,6 @@ You can basically do everything from magit-status.
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :bind ("C-x g" . magit-status))
-#+END_SRC
-
-* Org Mode
-** Set environment
-
-Base configuration.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package org
-    :bind (("C-c l" . org-store-link)
-           ("C-c a" . org-agenda)
-           ("C-c c" . org-capture))
-    :hook (org-mode . org-indent-mode))
-  (setq org-directory "~/Dropbox/org/")
-#+END_SRC
-
-I like to log completion time of repeated tasks.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-log-repeat "time")
-#+END_SRC
-
-Hide scheduled items from agenda view if they are done.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-agenda-skip-scheduled-if-done t)
-#+END_SRC
-
-Start showing upcoming deadlines in agenda 4 days in advance as opposed to default 14.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-deadline-warning-days 4)
-#+END_SRC
-
-I keep all my org stuff in Dropbox. Experimenting with =beorg= on iOS,
-so this behooves me.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-agenda-files '("~/.emacs.d/configuration.org" "~/Dropbox/org"))
-#+END_SRC
-
-Add some more states for todos.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "WAIT(w@/!)""DONE(d!)")))
-  (setq org-todo-keyword-faces
-             '(("WAIT" . "yellow")))
-#+END_SRC
-
-** Utility Functions
-
-Lifted from [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#org-mode][here]], thanks Adrien
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (defun org-file-path (filename)
-    "Return the absolute address of an org file, given its relative name."
-    (concat (file-name-as-directory org-directory) filename))
-
-  (defun org-find-file ()
-    "Leverage Helm to quickly open any org files."
-    (interactive)
-    (find-file (org-file-path (helm-comp-read "Select your org file: " (directory-files org-directory nil "\.org$")))))
-
-  (global-set-key (kbd "C-c M-o") 'org-find-file)
-#+END_SRC
-
-** Exporting
-
-Export to github flavored markdown
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package ox-gfm)
-#+END_SRC
-
-** Org-babel
-Load up the languages we want org-babel to be able to execute.
-#+BEGIN_SRC emacs-lisp :results output silent
-  (org-babel-do-load-languages
-   (quote org-babel-load-languages)
-   (quote ((emacs-lisp . t)
-           (python . t)
-           (org . t))))
-#+END_SRC
-
-** Org-bullets
-More readable.
-#+BEGIN_SRC emacs-lisp :results output silent
-(use-package org-bullets
-  :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-#+END_SRC
-** Capture Templates
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (setq org-capture-templates
-      '(("t" "Quick TODO" entry
-          (file+headline "~/Dropbox/org/gtd.org" "Shortterm")
-          "* TODO %?\nSCHEDULED: %t\nCaptured: %U\n")
-        ("p" "Personal TODO" entry
-          (file+headline "~/Dropbox/org/gtd.org" "Personal")
-          "* TODO %?\nCaptured: %U\n")
-        ("e" "Emacs Todo" entry
-          (file+headline "~/Dropbox/org/gtd.org" "Emacs")
-          "* TODO %?\nCaptured: %U\n")
-        ("r" "Restaurant" entry
-          (file+headline "~/Dropbox/org/lists.org" "Restaurants")
-          "* UPCOMING %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
-        ("l" "Web Link" entry
-          (file+headline "~/Dropbox/org/lists.org" "Internet Content")
-          "* UPCOMING %:description\nCaptured: %U\n%:link\n")
-        ("m" "Movie" entry
-          (file+headline "~/Dropbox/org/lists.org" "Movies")
-          "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
-        ("s" "TV Show" entry
-          (file+headline "~/Dropbox/org/lists.org" "TV Shows")
-          "* UPCOMING %?\nCaptured: %U\nGist: \nSource: \n")
-        ("b" "Book" entry
-         (file+headline "~/Dropbox/org/lists.org" "Books")
-         "* UPCOMING %?\nCaptured: %U\nAuthor(s): \nGist: \nSource: \n")))
-#+END_SRC
-
-** Org-Protocol
-
-I currently use Emacs as my reading list aggregator (mild plans to use Pocket in the future). We need =org-protocol= required to accept incoming requests, and to ensure that Emacs server is started.
-
-See [[https://github.com/xuchunyang/setup-org-protocol-on-mac][Setting Up org-protocl on Mac]] for more details.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-  (server-start)
-  (require 'org-protocol)
 #+END_SRC
 
 * Helm
@@ -338,6 +229,189 @@ Now the juice, don yer hats.
 =helm-xref= to get a helm interface for xref results.
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package helm-xref)
+#+END_SRC
+
+* Org Mode
+** Set environment
+
+Base configuration.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package org
+    :bind (("C-c l" . org-store-link)
+           ("C-c a" . org-agenda)
+           ("C-c c" . org-capture))
+    :hook (org-mode . org-indent-mode))
+  (setq org-directory "~/Dropbox/org/")
+#+END_SRC
+
+I like to log completion time of repeated tasks.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-log-repeat "time")
+#+END_SRC
+
+Add some more states for todos.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "WAIT(w@/!)" "DONE(d!)")))
+  (setq org-todo-keyword-faces
+             '(("TODO" . org-warning) ("WAIT" . "yellow")))
+#+END_SRC
+
+Customize refile targets
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-refile-targets '(("~/Dropbox/org/gtd.org" :maxlevel . 3)
+                             ("~/Dropbox/org/someday.org" :level . 1)
+                             ("~/Dropbox/org/tickler.org" :level . 1)))
+#+END_SRC
+
+Whenever I edit a TODO headline, save all org buffers (this is because I often update headlines in agenda view and forget to save, and then my Dropbox gets out of sync)
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (advice-add 'org-agenda-quit :before 'org-save-all-org-buffers)
+#+END_SRC
+
+=helm-org= for some helm magic on org-mode
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package helm-org
+    :after helm org-mode
+    :config ((add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+             (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))))
+#+END_SRC
+
+** Org Agenda
+I keep all my org stuff in Dropbox.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-agenda-files '("~/.emacs.d/configuration.org" "~/Dropbox/org"))
+#+END_SRC
+
+Hide scheduled items from agenda view if they are done.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-agenda-skip-scheduled-if-done t)
+#+END_SRC
+
+Start showing upcoming deadlines in agenda 4 days in advance as opposed to default 14.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-deadline-warning-days 4)
+#+END_SRC
+
+Custom agenda commands to filter on context
+#+BEGIN_SRC emacs-lisp :results output silent
+  ;; https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
+  (setq org-agenda-custom-commands 
+        '(("w" "Work" tags-todo "@work"
+           ((org-agenda-overriding-header "Work")))))
+#+END_SRC
+
+** Utility Functions
+
+Lifted from [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#org-mode][here]], thanks Adrien
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (defun org-file-path (filename)
+    "Return the absolute address of an org file, given its relative name."
+    (concat (file-name-as-directory org-directory) filename))
+
+  (defun org-find-file ()
+    "Leverage Helm to quickly open any org files."
+    (interactive)
+    (find-file (org-file-path (helm-comp-read "Select your org file: " (directory-files org-directory nil "\.org$")))))
+
+  (global-set-key (kbd "C-c M-o") 'org-find-file)
+#+END_SRC
+
+** Exporting
+
+Export to github flavored markdown
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package ox-gfm)
+#+END_SRC
+
+** Org-babel
+Load up the languages we want org-babel to be able to execute.
+#+BEGIN_SRC emacs-lisp :results output silent
+  (org-babel-do-load-languages
+   (quote org-babel-load-languages)
+   (quote ((emacs-lisp . t)
+           (python . t)
+           (org . t))))
+#+END_SRC
+
+** Org-bullets
+More readable.
+#+BEGIN_SRC emacs-lisp :results output silent
+(use-package org-bullets
+  :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
+
+** Capture Templates
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq org-capture-templates
+      '(("i" "Todo [inbox]" entry
+          (file+headline "~/Dropbox/org/inbox.org" "Tasks")
+          "* TODO %?\nCaptured: %U\n%i\n")
+        ("a" "Actionable" entry
+          (file+headline "~/Dropbox/org/gtd.org" "Actionables")
+          "* TODO %?\nCaptured: %U\n%i\n")
+        ("b" "Add to Bookshelf")
+        ("bf" "Book (Fiction)" entry
+          (file+headline "~/Dropbox/org/bookshelf.org" "Fiction")
+          "* %^{TITLE}\nAdded: %U\n:PROPERTIES:\n:AUTHOR: %^{AUTHOR}\n:END:\n%^G\n%?")
+        ("bn" "Book (Non-Fiction)" entry
+          (file+headline "~/Dropbox/org/bookshelf.org" "Non-Fiction")
+          "* %^{TITLE}\nAdded: %U\n:PROPERTIES:\n:AUTHOR: %^{AUTHOR}\n:END:\n%^G\n%?")
+        ("r" "Add Recommendations")
+        ("rr" "Restaurant Recommendation" entry
+          (file+headline "~/Dropbox/org/recommendations.org" "Restaurants")
+          "* %?\nCaptured: %U\nPrimary: \nRecommended Dishes: \nSource: \n")
+        ("rm" "Movie Recommendation" entry
+          (file+headline "~/Dropbox/org/recommendations.org" "Movies")
+          "* %?\nCaptured: %U\nGist: \nSource: \n")
+        ("rs" "TV Show Recommendation" entry
+          (file+headline "~/Dropbox/org/recommendations.org" "TV Shows")
+          "* %?\nCaptured: %U\nGist: \nSource: \n")
+        ("rb" "Book Recommendation" entry
+         (file+headline "~/Dropbox/org/recommendations.org" "Books")
+         "* %?\nCaptured: %U\nAuthor(s): \nGist: \nSource: \n")))
+#+END_SRC
+
+** Org-Protocol
+
+I currently use Emacs as my reading list aggregator (mild plans to use Pocket in the future). We need =org-protocol= required to accept incoming requests, and to ensure that Emacs server is started.
+
+See [[https://github.com/xuchunyang/setup-org-protocol-on-mac][Setting Up org-protocl on Mac]] for more details.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (server-start)
+  (require 'org-protocol)
+#+END_SRC
+
+** Org-Preset
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package org-present
+    :config
+    (progn
+      (add-hook 'org-present-mode-hook
+                     (lambda ()
+                       (text-scale-increase 0)
+                       (text-scale-increase 3)
+                       (org-display-inline-images)
+                       (org-present-hide-cursor)
+                       (org-present-read-only)))
+      (add-hook 'org-present-mode-quit-hook
+                (lambda ()
+                  (org-present-small)
+                  (org-remove-inline-images)
+                  (org-present-show-cursor)
+                  (org-present-read-write)))))
 #+END_SRC
 
 * Projectile
@@ -406,7 +480,7 @@ Let's add some Helm to that.
 ** LSP
 
 Configure LSP - I only use it for Python, currently.
-
+0
 #+BEGIN_SRC emacs-lisp :results output silent
   (use-package lsp-mode
     :config
@@ -471,12 +545,14 @@ This config is mostly borrowed from the fantastic Jamie Collinson (their config 
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
+    (setq flycheck-checker 'javascript-eslint)
     (setq flycheck-check-syntax-automatically '(save mode-enabled))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1)
     (company-mode +1))
 
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
+  (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
 
   (setq-default typescript-indent-level 4)
 #+END_SRC
@@ -666,7 +742,9 @@ For editing Fish shell files - this may go away if I ever have the courage to fu
 This feels like the "don't you guys have phones?" of major modes.
 
 #+BEGIN_SRC emacs-lisp :results output silent
-(use-package json-mode)
+  (use-package json-mode
+    :config
+    (setq json-reformat:indent-width 2))
 #+END_SRC
 
 *** Dockerfile Mode
@@ -742,6 +820,23 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
   (bind-key "C-!" 'eshell-here)
 #+END_SRC
 
+* IRC
+Trying out =circe= for IRC
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (load-file "~/private.el")
+
+  (use-package circe
+    :config
+    (setq circe-network-options
+          '(("Freenode"
+             :tls t
+             :nick "wneville"
+             :sasl-username irc-freenode-nick
+             :sasl-password irc-freenode-pass))))
+#+END_SRC
+
+
 * Snippets
 
 Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community library]], which are saved in =~/.emacs.d/yasnippet-snippets=. My snippets are in =~/.emacs.d/snippets=.
@@ -756,6 +851,18 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
     (global-set-key (kbd "M-/") 'company-yasnippet))
 #+END_SRC
 
+* Blogging
+=easy-hugo= is a fantastic, feature rich package for working with the Hugo static site generator.
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (use-package easy-hugo
+    :init
+    (setq easy-hugo-basedir "~/code/blog/")
+    (setq easy-hugo-url "https://wneville.github.io")
+    (setq easy-hugo-postdir "content/blog")
+    (setq easy-hugo-default-ext ".org"))
+#+END_SRC
+
 * Internal Doc Enhancement
 ** =helpful= for prettier docs
 #+BEGIN_SRC emacs-lisp  :results output silent
@@ -768,15 +875,6 @@ Using [[https://github.com/AndreaCrotti/yasnippet-snippets][this community libra
 #+END_SRC
 
 * Misc Configuration
-** exec-path-from-shell (OSX specific)
-#+BEGIN_SRC emacs-lisp :results output silent
-  (use-package exec-path-from-shell
-    :config
-    (when (memq window-system '(mac ns))
-      (exec-path-from-shell-initialize)
-      (exec-path-from-shell-copy-envs
-       '("PATH"))))
-#+END_SRC
 ** Backups in one folder
 Don't like to pollute the file tree with backups if I don't have to.
 #+BEGIN_SRC emacs-lisp :results output silent
