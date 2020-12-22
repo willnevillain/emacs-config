@@ -383,15 +383,16 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
     (interactive)
     (tide-setup)
     (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
-    (setq flycheck-check-syntax-automatically
-          '(save idle-change mode-enabled new-line)) ;; Configure aggressive syntax checking cadence
+    (setq flycheck-check-syntax-automatically ;; Configure syntax checking triggers and delays
+          '(idle-change mode-enabled save)
+          flycheck-idle-change-delay 1.5)
     (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
     (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
     (setq tide-tscompiler-executable "./node_modules/.bin/tsc")
     (setq tide-tsserver-executable "./node_modules/.bin/tsserver")
     (setq flycheck-checker 'javascript-eslint)
     (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
-    (setq flycheck-eslint-args '("--cache \\*\\*/\\_.ts")))
+    (setq flycheck-eslint-args '("--cache")))
 
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
 #+end_src
@@ -426,6 +427,16 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 #+begin_src emacs-lisp
   (use-package yaml-mode)
+#+end_src
+
+*** Install =markdown-mode=
+
+[[https://github.com/jrblevin/markdown-mode][markdown-mode]] provides Markdown editing support.
+
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)))
 #+end_src
 
 *** Install =json-mode=
@@ -595,7 +606,8 @@ Any utility functions that are used at a global level go here.
 ** Jump to this configuration file
 
 #+begin_src emacs-lisp
-  (defun wneville/goto-configuraion ()
+  (defun wneville/goto-configuration ()
+    "Go to org configuration file."
     (interactive)
     (find-file "~/.emacs.d/config.org"))
 
