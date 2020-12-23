@@ -303,6 +303,16 @@ Start showing upcoming deadlins in agenda 5 days in advance - default of 14 days
   (use-package ox-gfm)
 #+end_src
 
+** Configure =org-babel= languages
+
+[[https://orgmode.org/worg/org-contrib/babel/intro.html][org-babel]] allows executing src blocks in org files.
+
+We define the languages that we want =org-babel= to execute.
+
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
+#+end_src
+
 * Configure =projectile=
 
 [[https://github.com/bbatsov/projectile][projectile]] is a very powerful library for interacting with multiple projects.
