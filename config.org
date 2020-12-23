@@ -7,8 +7,9 @@
 For this configuration to work correctly, the following dependencies must be installed on your system.
 
 - ripgrep
-- preferable: project local installations of eslint for JS / TS projects
-- preferable: project local installations of prettier for JS / TS projects
+- optional: Hack font
+- optional: project local installations of eslint for JS / TS projects
+- optional: project local installations of prettier for JS / TS projects
 
 * Add package repositories
 
@@ -290,6 +291,16 @@ Start showing upcoming deadlins in agenda 5 days in advance - default of 14 days
 
 #+begin_src emacs-lisp
   (setq org-deadline-warning-days 5)
+#+end_src
+
+** Configure additional export options
+
+*** GitHub Flavored Markdown (gfm)
+
+[[https://github.com/larstvei/ox-gfm][ox-gfm]] adds support for export org files to GitHub Flavored Markdown.
+
+#+begin_src emacs-lisp
+  (use-package ox-gfm)
 #+end_src
 
 * Configure =projectile=
