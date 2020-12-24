@@ -333,6 +333,27 @@ We define the languages that we want =org-babel= to execute.
   (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
 #+end_src
 
+** Configure =org-mode= utility functions
+
+*** Get absolute path of file in =org-directory=
+
+#+begin_src emacs-lisp
+  (defun org-file-path (filename)
+      "Return the absolute address of an org file, given its relative name."
+      (concat (file-name-as-directory org-directory) filename))
+#+end_src
+
+*** Jump to file in =org-directory= w/Helm
+
+#+begin_src emacs-lisp
+  (defun org-find-file ()
+      "Leverage Helm to quickly open any org files."
+      (interactive)
+      (find-file (org-file-path (helm-comp-read "Select org file: " (directory-files org-directory nil "\.org$")))))
+
+  (global-set-key (kbd "C-c M-o") 'org-find-file)
+#+end_src
+
 * Configure =projectile=
 
 [[https://github.com/bbatsov/projectile][projectile]] is a very powerful library for interacting with multiple projects.
