@@ -172,6 +172,26 @@ Use the [[https://sourcefoundry.org/hack/][Hack]] font if installed on the syste
         (set-face-attribute 'default nil :font "Hack-12")))
 #+end_src
 
+** Custom modeline
+
+Very minimal modeline, trim of the original modeline with some custom symbols for style.
+
+#+begin_src emacs-lisp
+  (setq-default mode-line-format '(" 𝛌"
+                                   mode-line-front-space
+                                   mode-line-modified
+                                   " "
+                                   "%[" mode-line-buffer-identification "%]"
+                                   "  "
+                                   mode-line-modes
+                                   mode-line-misc-info
+                                   " "
+                                   (:propertize " " display ((space :align-to (- right 1))))
+                                   mode-line-end-spaces
+                                   "☉"
+                                   ))
+#+end_src
+
 * Configure =helm=
 
 [[https://github.com/emacs-helm/helm][helm]] and similar projects can be hard to describe; =helm= describes itself as an "incremental completion and selection narrowing framework".
