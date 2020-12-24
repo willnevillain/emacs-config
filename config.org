@@ -697,6 +697,17 @@ I dislike polluting the file tree with Emacs backups - I put them all in =~/.ema
   (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+end_src
 
+** Configure =flyspell= spell checking
+
+[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Spelling.html][flyspell]] (built in) will highlight misspelled words by way of an underlying spell checking program (on OS X it is probably =ispell=).
+
+I only want global spell checking in =org-mode= buffers, and for programming mode buffers enable =flyspell-prog-mode= which only spell checks comments and strings.
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'flyspell-mode)
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+#+end_src
+
 ** Configure diminished minor modes
 
 There are a few minor modes not specifically configured in this file that I like to diminish.
@@ -705,6 +716,7 @@ There are a few minor modes not specifically configured in this file that I like
   (diminish 'abbrev-mode)
   (diminish 'auto-revert-mode)
   (diminish 'eldoc-mode)
+  (diminish 'flyspell-mode)
 #+end_src
 
 * Configure and load custom file
