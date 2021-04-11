@@ -719,7 +719,6 @@ I only want global spell checking in =org-mode= buffers, and for programming mod
 
 #+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'flyspell-mode)
-  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 #+end_src
 
 ** Configure diminished minor modes
