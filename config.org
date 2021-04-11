@@ -97,12 +97,6 @@ Will maybe pull out these specific changes into dedicated config to avoid risk a
 
 ** Startup UI / UX behavior
 
-Start in full screen by default with =toggle-frame-maximized=.
-
-#+begin_src emacs-lisp
-  (toggle-frame-maximized)
-#+end_src
-
 Inhibit startup message and have scratch buffer empty by default.
 
 #+begin_src emacs-lisp
