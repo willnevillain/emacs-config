@@ -409,7 +409,7 @@ Anything related to a specific programming language, or programming major mode a
     :diminish company-mode
     :config
     (global-company-mode)
-    (setq company-idle-delay 0.3 ;; show candidates 0.3 sec after idle from typing
+    (setq company-idle-delay 0.2 ;; show candidates 0.3 sec after idle from typing
           company-minimum-prefix-length 1 ;; show candidates as early as 1 character
           company-selection-wrap-around t ;; if you scroll past last/first candidate, wrap around
           global-company-modes '(not org-mode))) ;; disable company for modes
@@ -420,7 +420,7 @@ Anything related to a specific programming language, or programming major mode a
 #+begin_src emacs-lisp
   (use-package company-quickhelp
     :config
-    (setq company-quickhelp-delay 1.2)
+    (setq company-quickhelp-delay 0.5)
     (company-quickhelp-mode))
 #+end_src
 
@@ -441,14 +441,13 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
     (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
     (setq flycheck-check-syntax-automatically ;; Configure syntax checking triggers and delays
           '(idle-change mode-enabled save)
-          flycheck-idle-change-delay 1.5)
+          flycheck-idle-change-delay 0.5)
     (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
     (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
-    (setq tide-tscompiler-executable "./node_modules/.bin/tsc")
-    (setq tide-tsserver-executable "./node_modules/.bin/tsserver")
     (setq flycheck-checker 'javascript-eslint)
     (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
-    (setq flycheck-eslint-args '("--cache")))
+    (setq flycheck-eslint-args '("--cache" "**/*.ts"))
+    (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file ~/tmp/tss.log")))
 
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
 #+end_src
