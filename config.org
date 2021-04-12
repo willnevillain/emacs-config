@@ -547,6 +547,31 @@ The [[https://github.com/abrochard][author]] gave an interesting talk about how 
   (use-package kubel)
 #+end_src
 
+* Configure =ejc-sql=
+
+[[https://github.com/kostafey/ejc-sql][ejc-sql]] is an Emacs SQL client
+
+#+begin_src emacs-lisp
+  (use-package ejc-sql
+    :config
+    (setq clomacs-httpd-default-port 8090)
+    (setq ejc-completion-system 'standard)
+    (add-hook 'ejc-sql-minor-mode-hook (lambda () (ejc-eldoc-setup))))
+
+  (use-package 'ejc-autocomplete
+    :config
+    (add-hook 'ejc-sql-minor-mode-hook (lambda ()
+                                         (auto-complete-mode t)
+                                         (ejc-ac-setup))))
+
+  (use-package 'ejc-company
+    :config
+    (push 'ejc-company-backend company-backends)
+    (add-hook 'ejc-sql-minor-mode-hook (lambda () (company-mode t))))
+#+end_src
+
+#+RESULTS:
+
 * Configure =eshell=
 
 [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][eshell]] is a shell-like command interpreter implemented entirely in Emacs Lisp.
