@@ -11,12 +11,22 @@ For this configuration to work correctly, the following dependencies must be ins
 - optional: project local installations of eslint for JS / TS projects
 - optional: project local installations of prettier for JS / TS projects
 
+* SSL config
+
+Allows for pulling from =https= package archives.
+
+#+begin_src emacs-lisp
+  (setq tls-checktrust t)
+  (setq gnutls-verify-error t)
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+#+end_src
+
 * Add package repositories
 
 #+begin_src emacs-lisp
   (require 'package)
   (setq package-enable-at-startup nil)
-  (setq package-archives '(("melpa" . "http://melpa.org/packages/")))
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (package-initialize)
 #+end_src
 
