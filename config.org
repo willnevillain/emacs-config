@@ -443,7 +443,8 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
 [[https://github.com/ananthakumaran/tide][tide]] is an IDE for TypeScript for Emacs.
 
 #+begin_src emacs-lisp
-  (use-package tide)
+  (use-package tide
+    :bind (("M-RET" . tide-fix)))
 
   (defun setup-tide-mode ()
     (interactive)
