@@ -552,26 +552,29 @@ The [[https://github.com/abrochard][author]] gave an interesting talk about how 
 
 [[https://github.com/kostafey/ejc-sql][ejc-sql]] is an Emacs SQL client
 
+First, install =auto-complete= for autocompletion.
+
+#+begin_src emacs-lisp
+  (use-package auto-complete)
+#+end_src
+
 #+begin_src emacs-lisp
   (use-package ejc-sql
+    :bind (("C-c e b" . ejc-get-temp-editor-buffer))
     :config
     (setq clomacs-httpd-default-port 8090)
     (setq ejc-completion-system 'standard)
-    (add-hook 'ejc-sql-minor-mode-hook (lambda () (ejc-eldoc-setup))))
-
-  (use-package 'ejc-autocomplete
-    :config
     (add-hook 'ejc-sql-minor-mode-hook (lambda ()
+                                         ;; eldoc
+                                         (ejc-eldoc-setup)
+
+                                         ;; autocompletion
                                          (auto-complete-mode t)
-                                         (ejc-ac-setup))))
+                                         (ejc-ac-setup)
 
-  (use-package 'ejc-company
-    :config
-    (push 'ejc-company-backend company-backends)
-    (add-hook 'ejc-sql-minor-mode-hook (lambda () (company-mode t))))
+                                         ;; company-mode support (global-company enabled)
+                                         (push 'ejc-company-backend company-backends))))
 #+end_src
-
-#+RESULTS:
 
 * Configure =eshell=
 
