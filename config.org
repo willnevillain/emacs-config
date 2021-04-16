@@ -390,9 +390,17 @@ It provides features and functions that operate on the project level, such as ju
 
 * Cofigure =magit=
 
+[[https://github.com/magit/magit][magit]] is a Git porcelain for Emacs, and honestly one of the killer apps of Emacs.
+
 #+begin_src emacs-lisp
   (use-package magit
     :bind ("C-x g" . magit-status))
+#+end_src
+
+[[https://github.com/alphapapa/magit-todos][magit-todos]] for visualizing =TODO= items marked across the source.
+
+#+begin_src emacs-lisp
+  (use-package magit-todos)
 #+end_src
 
 * Programming environment
