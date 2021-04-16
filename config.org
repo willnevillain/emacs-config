@@ -126,7 +126,6 @@ Show column numbers in the modeline, and show line numbers on the left side.
 
 #+begin_src emacs-lisp
   (setq column-number-mode t)
-  (global-display-line-numbers-mode) 
 #+end_src
 
 Ask for confirmation before quitting - remove pain of accidental =C-x C-c= fat fingers.
