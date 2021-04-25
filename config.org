@@ -1,5 +1,5 @@
 #+TITLE: Emacs Config
-#+AUTHOR: wneville
+#+AUTHOR: peatsheep
 #+OPTIONS: toc:nil num:nil
 
 * Required external dependencies
