@@ -151,16 +151,29 @@ Auto-indent on =RET= in addition to usual =C-j=.
 [[https://draculatheme.com/emacs][dracula]] is a stylish and spooky dark theme.
 
 #+begin_src emacs-lisp
-  (use-package dracula-theme
+  ;; (use-package dracula-theme
+  ;;   :config
+  ;;   (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
+
+  (use-package modus-themes
+    :init
+    (setq modus-themes-slanted-constructs t
+          modus-themes-bold-constructs nil
+          modus-themes-region 'no-extend)
+    (modus-themes-load-themes)
+
     :config
-    (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
+    (modus-themes-load-vivendi))
 #+end_src
 
 Load the theme.
 
 #+begin_src emacs-lisp
-  (load-theme 'dracula t)
+  ;; (load-theme 'dracula t)
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Font
 
@@ -214,24 +227,47 @@ We can get =helm= support for =flx= via [[https://github.com/PythonNut/helm-flx]
 ** Install =helm=, rebind common functions, fuzzy match everywhere
 
 #+begin_src emacs-lisp
-  (use-package helm
-    :demand ;; Do not defer regardless of circumstances
-    :diminish helm-mode
-    :bind (("M-x" . helm-M-x) ;; Helm interactive function completion
-           ("M-y" . helm-show-kill-ring) ;; Helm kill ring
-           ("C-x b" . helm-mini) ;; Helm buffers list
-           ("C-x C-b" . helm-mini) ;; Almost every time I hit C-x C-b I meant to hit C-x b
-           ("C-x C-f" . helm-find-files)) ;; Helm find files
+  ;; (use-package helm
+  ;;   :demand ;; Do not defer regardless of circumstances
+  ;;   :diminish helm-mode
+  ;;   :bind (("M-x" . helm-M-x) ;; Helm interactive function completion
+  ;;          ("M-y" . helm-show-kill-ring) ;; Helm kill ring
+  ;;          ("C-x b" . helm-mini) ;; Helm buffers list
+  ;;          ("C-x C-b" . helm-mini) ;; Almost every time I hit C-x C-b I meant to hit C-x b
+  ;;          ("C-x C-f" . helm-find-files)) ;; Helm find files
+  ;;   :config
+  ;;   (helm-mode 1)
+  ;;   (helm-flx-mode 1)
+  ;;   (setq helm-mode-fuzzy-match t   ;; Fuzzy match config
+  ;;         helm-buffers-fuzzy-matching t
+  ;;         helm-lisp-fuzzy-completion t
+  ;;         helm-locate-fuzzy-match t
+  ;;         helm-M-x-fuzzy-match t
+  ;;         helm-recentf-fuzzy-match t)
+  ;;   (setq helm-buffer-max-length 48))
+
+  (use-package counsel
+    :bind (("C-s" . swiper)
+           ("M-x" . counsel-M-x)
+           ("M-y" . counsel-yank-pop)
+           ("C-x b" . ivy-switch-buffer)
+           ("C-x C-b" . ivy-switch-buffer) ;; This key stroke is typically done in error trying to do C-x b
+           ("C-x C-f" . counsel-find-file)
+           ("C-c C-r" . ivy-resume)))
+
+  (use-package ivy
+    :diminish ivy-mode
     :config
-    (helm-mode 1)
-    (helm-flx-mode 1)
-    (setq helm-mode-fuzzy-match t   ;; Fuzzy match config
-          helm-buffers-fuzzy-matching t
-          helm-lisp-fuzzy-completion t
-          helm-locate-fuzzy-match t
-          helm-M-x-fuzzy-match t
-          helm-recentf-fuzzy-match t)
-    (setq helm-buffer-max-length 48))
+    (ivy-mode t)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-height 15)
+    (setq ivy-count-format "(%d/%d) "))
+
+  (use-package counsel-projectile
+    :diminish counsel-projectile-mode
+    :config
+    (counsel-projectile-mode t)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+end_src
 
 ** Configure =ripgrep= via =helm-ag= as search tool
@@ -245,10 +281,10 @@ There exists a project [[https://github.com/cosmicexplorer/helm-rg][helm-rg]] to
 As a workaround, I use =helm-ag= and configure base command to run the =ripgrep= executable, which has worked perfectly.
 
 #+begin_src emacs-lisp
-  (use-package ag)
-  (use-package helm-ag
-    :config
-    (setq helm-ag-base-command "rg --no-heading"))
+  ;; (use-package ag)
+  ;; (use-package helm-ag
+  ;;   :config
+  ;;   (setq helm-ag-base-command "rg --no-heading"))
 #+end_src
 
 ** Install =helm-xref=
@@ -256,7 +292,7 @@ As a workaround, I use =helm-ag= and configure base command to run the =ripgrep=
 [[https://github.com/brotzeit/helm-xref][helm-xref]] provides a =helm= interface for results of the built-in [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]].
 
 #+begin_src emacs-lisp
-  (use-package helm-xref)
+  ;; (use-package helm-xref)
 
 #+end_src
 
@@ -346,15 +382,15 @@ We define the languages that we want =org-babel= to execute.
       (concat (file-name-as-directory org-directory) filename))
 #+end_src
 
-*** Jump to file in =org-directory= w/Helm
+*** Jump to file in =org-directory= w/Ivy
 
 #+begin_src emacs-lisp
-  (defun org-find-file ()
-      "Leverage Helm to quickly open any org files."
+  (defun willnevillain/org-find-file ()
+      "Leverage Ivy to quickly open any org files."
       (interactive)
-      (find-file (org-file-path (helm-comp-read "Select org file: " (directory-files org-directory nil "\.org$")))))
+      (find-file (org-file-path (ivy-read "Select org file: " (directory-files org-directory nil "\.org$")))))
 
-  (global-set-key (kbd "C-c M-o") 'org-find-file)
+  (global-set-key (kbd "C-c M-o") 'willnevillain/org-find-file)
 #+end_src
 
 * Configure =projectile=
@@ -380,12 +416,12 @@ It provides features and functions that operate on the project level, such as ju
 [[https://github.com/bbatsov/helm-projectile][helm-projectile]] provides =helm= integration for =projectile= - it's written by the same author as =projectile=, the prolific [[https://github.com/bbatsov][Bozhidar Batsov]].
 
 #+begin_src emacs-lisp
-  (use-package helm-projectile
-    :bind (("C-c v" . helm-projectile)
-           ("C-c f" . helm-projectile-find-file)
-           ("C-c b" . helm-projectile-switch-to-buffer)
-           ("C-c s" . helm-do-ag-project-root)
-           ("C-c w" . helm-projectile-switch-project)))
+  ;; (use-package helm-projectile
+  ;;   :bind (("C-c v" . helm-projectile)
+  ;;          ("C-c f" . helm-projectile-find-file)
+  ;;          ("C-c b" . helm-projectile-switch-to-buffer)
+  ;;          ("C-c s" . helm-do-ag-project-root)
+  ;;          ("C-c w" . helm-projectile-switch-project)))
 #+end_src
 
 * Cofigure =magit=
@@ -450,24 +486,45 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
 [[https://github.com/ananthakumaran/tide][tide]] is an IDE for TypeScript for Emacs.
 
 #+begin_src emacs-lisp
-  (use-package tide
-    :bind (("M-RET" . tide-fix)))
+  ;; (use-package tide
+  ;;   :bind (("M-RET" . tide-fix)))
 
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
-    (setq flycheck-check-syntax-automatically ;; Configure syntax checking triggers and delays
-          '(idle-change mode-enabled save)
-          flycheck-idle-change-delay 0.5)
-    (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
-    (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
-    (setq flycheck-checker 'javascript-eslint)
-    (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
-    (setq flycheck-eslint-args '("--cache" "**/*.ts"))
-    (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file ~/tmp/tss.log")))
+  ;; (defun setup-tide-mode ()
+  ;;   (interactive)
+  ;;   (tide-setup)
+  ;;   (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
+  ;;   (setq flycheck-check-syntax-automatically ;; Configure syntax checking triggers and delays
+  ;;         '(idle-change mode-enabled save)
+  ;;         flycheck-idle-change-delay 0.5)
+  ;;   (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
+  ;;   (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
+  ;;   (setq flycheck-checker 'javascript-eslint)
+  ;;   (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
+  ;;   (setq flycheck-eslint-args '("--cache" "**/*.ts"))
+  ;;   (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file ~/tmp/tss.log")))
 
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+  ;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+  (use-package lsp-mode
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+
+    :hook
+    (typescript-mode . lsp)
+    (javascript-mode . lsp)
+    (lsp-mode . lsp-enable-which-key-integration)
+
+    :config
+    ;; (setq lsp-enable-on-type-formatting nil)
+    ;; (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint/server/out/eslintServer.js" "--stdio"))
+    ;; (setq lsp-eslint-auto-fix-on-save t)
+
+    :commands lsp)
+
+  (use-package lsp-ui :commands lsp-ui-mode)
+  ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+  (use-package which-key :diminish which-key-mode :config (which-key-mode))
 #+end_src
 
 *** Add node_modules =.bin= folder to =exec-path=
@@ -642,9 +699,9 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
 Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 
 #+begin_src emacs-lisp
-  (add-hook 'eshell-mode-hook ;; Bind key to view preconfigured Helm view of eshell history
-            (lambda ()
-              (define-key eshell-mode-map (kbd "M-r") 'helm-eshell-history)))
+  ;; (add-hook 'eshell-mode-hook ;; Bind key to view preconfigured Helm view of eshell history
+  ;;           (lambda ()
+  ;;             (define-key eshell-mode-map (kbd "M-r") 'helm-eshell-history)))
 
   (defun eshell-pop--kill-and-delete-window ()
     "Used on eshell exit hook, will delete the window if not the only one in the frame"
@@ -695,7 +752,7 @@ My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs
   (use-package easy-hugo
     :init
     (setq easy-hugo-basedir "~/code/blog/")
-    (setq easy-hugo-url "https://wneville.github.io")
+    (setq easy-hugo-url "https://willnevillain.github.io")
     (setq easy-hugo-postdir "content/blog")
     (setq easy-hugo-default-ext ".org"))
 #+end_src
@@ -707,12 +764,12 @@ Any utility functions that are used at a global level go here.
 ** Jump to this configuration file
 
 #+begin_src emacs-lisp
-  (defun wneville/goto-configuration ()
+  (defun willnevillain/goto-configuration ()
     "Go to org configuration file."
     (interactive)
     (find-file "~/.emacs.d/config.org"))
 
-  (global-set-key (kbd "C-c M-c") 'wneville/goto-configuration)
+  (global-set-key (kbd "C-c M-c") 'willnevillain/goto-configuration)
 #+end_src
 
 * Miscellaney
