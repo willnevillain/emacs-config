@@ -73,6 +73,13 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
    '(use-package diminish))
 #+end_src
 
+[[https://github.com/quelpa/quelpa][quelpa]] allows building and installing packages directly from source - useful for packages not in registries.
+
+#+begin_src emacs-lisp
+  (use-package quelpa)
+  (use-package quelpa-use-package)
+#+end_src
+
 ** Trigger =use-package=
 
 =use-package-always-ensure= set to =t= is equivalent to all =use-package= declaractions having the =:ensure= keyword set to =t=.
@@ -181,12 +188,14 @@ Use the [[https://sourcefoundry.org/hack/][Hack]] font if installed on the syste
 
 #+begin_src emacs-lisp
   (if (condition-case nil
-          (x-list-fonts "Hack")
+          (x-list-fonts "JetBrains Mono")
         (error nil))
       (progn
-        (add-to-list 'default-frame-alist '(font . "Hack-12"))
-        (set-face-attribute 'default nil :font "Hack-12")))
+        (add-to-list 'default-frame-alist '(font . "JetBrains Mono-14"))
+        (set-face-attribute 'default nil :font "JetBrains Mono-14")))
 #+end_src
+
+#+RESULTS:
 
 ** Custom modeline
 
@@ -549,6 +558,17 @@ This allows using project based installations of tools like =eslint= and =pretti
     :hook (typescript-mode . prettier-js-mode))
 #+end_src
 
+*** Install =emacs-prisma-mode=
+
+[[https://github.com/pimeys/emacs-prisma-modelink][emacs-prisma-mode]] is a nice little major mode for editing [[https://www.prisma.io/][Prisma]] schemas.
+
+#+begin_src emacs-lisp
+  (use-package prisma-mode
+    :quelpa (prisma-mode :fetcher github :repo "pimeys/emacs-prisma-mode" :branch "main"))
+#+end_src
+
+#+RESULTS:
+
 ** Configure development adjacent major modes
 
 *** Install =yaml-mode=
@@ -770,6 +790,20 @@ Any utility functions that are used at a global level go here.
     (find-file "~/.emacs.d/config.org"))
 
   (global-set-key (kbd "C-c M-c") 'willnevillain/goto-configuration)
+#+end_src
+
+** Toggle font size for streaming mode
+#+begin_src emacs-lisp
+  (defun willnevillain/toggle-stream-fontsize ()
+    "Toggle the font size between default and large for streaming"
+    (interactive)
+     (if (string= (cdar default-frame-alist) "JetBrains Mono-24")
+         (progn
+           (setcar default-frame-alist '(font . "JetBrains Mono-14"))
+           (set-face-attribute 'default nil :font "JetBrains Mono-14"))
+       (progn
+         (setcar default-frame-alist '(font . "JetBrains Mono-24"))
+         (set-face-attribute 'default nil :font "JetBrains Mono-24"))))
 #+end_src
 
 * Miscellaney
