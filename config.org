@@ -73,13 +73,6 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
    '(use-package diminish))
 #+end_src
 
-[[https://github.com/quelpa/quelpa][quelpa]] allows building and installing packages directly from source - useful for packages not in registries.
-
-#+begin_src emacs-lisp
-  (use-package quelpa)
-  (use-package quelpa-use-package)
-#+end_src
-
 ** Trigger =use-package=
 
 =use-package-always-ensure= set to =t= is equivalent to all =use-package= declaractions having the =:ensure= keyword set to =t=.
@@ -320,6 +313,8 @@ This configuration will grow depending on my increased usage of =org-mode=.
 ** Set environment - important keybindings and =org-indent-mode= hook
 
 #+begin_src emacs-lisp
+  (add-to-list 'org-modules 'org-habit t)
+
   (use-package org
     :bind (("C-c l" . org-store-link)
            ("C-c a" . org-agenda)
@@ -338,7 +333,19 @@ I keep all org files in Dropbox.
 Likewise, agenda files will live in Dropbox.
 
 #+begin_src emacs-lisp
-  (setq org-agenda-files '("~/Dropbox/org"))
+  (defun willnevillain/set-org-agenda-files ()
+    (interactive)
+    (setq org-agenda-files (directory-files-recursively org-directory "org$")))
+
+  (willnevillain/set-org-agenda-files)
+
+  (setq org-agenda-custom-commands
+        '(("p" tags "PROJECT" nil)
+          ("d" "Dashboard" (
+                            (agenda ""
+                                    ((org-deadline-warning-days 7)))
+                            (tags "PROJECT-MAYBE"
+                                  ((org-agenda-overriding-header "Active Projects")))))))
 #+end_src
 
 ** Timed task configuration tweaks
@@ -355,10 +362,18 @@ Hide scheduled items from agenda view if they're already done.
   (setq org-agenda-skip-scheduled-if-done t)
 #+end_src
 
-Start showing upcoming deadlins in agenda 5 days in advance - default of 14 days is too much for me.
+Start showing upcoming deadlines in agenda 5 days in advance - default of 14 days is too much for me.
 
 #+begin_src emacs-lisp
   (setq org-deadline-warning-days 5)
+#+end_src
+
+** Configure todo keywords
+
+#+begin_src emacs-lisp
+  (setq org-todo-keywords
+        '((sequence "TODO(t!)" "|" "DONE(d!)")))
+  (setq org-treat-insert-todo-heading-as-state-change t)
 #+end_src
 
 ** Configure additional export options
@@ -400,6 +415,74 @@ We define the languages that we want =org-babel= to execute.
       (find-file (org-file-path (ivy-read "Select org file: " (directory-files org-directory nil "\.org$")))))
 
   (global-set-key (kbd "C-c M-o") 'willnevillain/org-find-file)
+#+end_src
+
+** Configure capture templates
+
+#+begin_src emacs-lisp
+  (setq org-capture-templates
+        `(("i" "Inbox Item" entry (file ,(expand-file-name "inbox.org" org-directory))
+           "* %?\nCaptured: %U\n")))
+#+end_src
+
+** Configure org-refile
+
+#+begin_src emacs-lisp
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+#+end_src
+
+* Configure =org-roam=
+
+#+begin_src emacs-lisp
+  (defun willnevillain/create-or-find-org-roam-daily-note ()
+      (interactive)
+      (if (file-exists-p (concat "~/Dropbox/org/daily/" (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
+          (org-roam-dailies-find-today)
+        (org-roam-dailies-capture-today)))
+
+    (use-package org-roam
+      :diminish org-roam-mode
+      :config
+      (progn
+        (setq org-roam-directory org-directory
+              org-roam-dailies-directory "daily/"
+              org-roam-dailies-capture-templates      `(("d" "default" entry
+                                                         #'org-roam-capture--get-point
+                                                         ,(concat
+                                                           "* Tasks\n"
+                                                           "* Work Focuses\n"
+                                                           "* Journal\n"
+                                                           "** Morning\n"
+                                                           "** Evening\n"
+                                                           "* Checklists\n"
+                                                           "** Morning\n"
+                                                           "- [ ] Check notebook, Todoist =Inbox= and inbox.org for incoming items\n"
+                                                           "- [ ] Check Todoist =Today= and yesterday's daily note for overflow items\n"
+                                                           "- [ ] Ensure Todoist and Emacs task states in sync\n"
+                                                           "- [ ] Sort and prioritize new items\n"
+                                                           "- [ ] Add personal and work 'must dos' to docket, and work focuses if applicable\n"
+                                                           "- [ ] Reflect on 'want to dos' and projects\n"
+                                                           "  - [ ] Add achievables to docket\n"
+                                                           "  - [ ] Reflect on important daily habits and note when you will do them\n"
+                                                           "- [ ] Reflect on what is slated for today. Is this reasonable? Prune as necessary.\n"
+                                                           "- [ ] Journal thoughts, ambitions, goals\n"
+                                                           "** Evening\n"
+                                                           "- [ ] Check Todoist =Inbox= and inbox.org for incoming items\n"
+                                                           "- [ ] Reflect on incomplete items. What should be deprioritized, what should be overflowed?\n"
+                                                           "- [ ] Ensure Todoist and Emacs task states in sync\n"
+                                                           "- [ ] Sort and prioritize new items\n"
+                                                           "- [ ] Reflect on 'want to dos' and projects\n"
+                                                           "  - [ ] Did achievables get completed / will be completed before bed? Reflect on why.\n"
+                                                           "  - [ ] Did you do the important daily habits / will you do them before bed? Reflect on why.\n"
+                                                           "- [ ] Journal on how the day went and anything else\n")
+                                                         :file-name "daily/%<%Y-%m-%d>"
+                                                         :head "#+title: %<%Y-%m-%d>\n\n")))
+        (org-roam-mode t))
+      :bind (("C-c M-t" . willnevillain/create-or-find-org-roam-daily-note)
+             ("C-c M-p" . org-roam-dailies-find-previous-note)))
 #+end_src
 
 * Configure =projectile=
@@ -495,24 +578,7 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
 [[https://github.com/ananthakumaran/tide][tide]] is an IDE for TypeScript for Emacs.
 
 #+begin_src emacs-lisp
-  ;; (use-package tide
-  ;;   :bind (("M-RET" . tide-fix)))
-
-  ;; (defun setup-tide-mode ()
-  ;;   (interactive)
-  ;;   (tide-setup)
-  ;;   (flycheck-mode 1) ;; Enable flycheck mode if not already enabled
-  ;;   (setq flycheck-check-syntax-automatically ;; Configure syntax checking triggers and delays
-  ;;         '(idle-change mode-enabled save)
-  ;;         flycheck-idle-change-delay 0.5)
-  ;;   (eldoc-mode 1) ;; Show documentation for object under point in echo area on idle
-  ;;   (setq-default typescript-indent-level 4) ;; Set indent level to 4 (this is better as a dir-local)
-  ;;   (setq flycheck-checker 'javascript-eslint)
-  ;;   (flycheck-add-next-checker 'javascript-eslint 'typescript-tide)
-  ;;   (setq flycheck-eslint-args '("--cache" "**/*.ts"))
-  ;;   (setq tide-tsserver-process-environment '("TSS_LOG=-level verbose -file ~/tmp/tss.log")))
-
-  ;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
+  (use-package typescript-mode)
 
   (use-package lsp-mode
     :init
@@ -524,16 +590,29 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
     (lsp-mode . lsp-enable-which-key-integration)
 
     :config
-    ;; (setq lsp-enable-on-type-formatting nil)
-    ;; (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint/server/out/eslintServer.js" "--stdio"))
-    ;; (setq lsp-eslint-auto-fix-on-save t)
+    (setq lsp-enable-on-type-formatting nil)
+    (setq lsp-eslint-validate [javascript typescript])
+    (setq lsp-eslint-package-manager "yarn")
+    (setq lsp-eslint-format nil)
+    (setq lsp-eslint-trace-server t)
+    (setq lsp-log-io t)
 
     :commands lsp)
 
-  (use-package lsp-ui :commands lsp-ui-mode)
+  (use-package lsp-ui
+    :config (setq lsp-ui-sideline-show-code-actions nil)
+    :commands lsp-ui-mode)
+
   ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
   (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
   (use-package which-key :diminish which-key-mode :config (which-key-mode))
+#+end_src
+
+*** Node version management with =nvm=
+
+#+begin_src emacs-lisp
+  (use-package nvm
+    :hook (typescript-mode . nvm-use-for))
 #+end_src
 
 *** Add node_modules =.bin= folder to =exec-path=
@@ -544,7 +623,9 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 #+begin_src emacs-lisp
   (use-package add-node-modules-path
-    :hook (typescript-mode . add-node-modules-path))
+    :hook (typescript-mode . add-node-modules-path)
+    :hook (json-mode . add-node-modules-path)
+    :hook (yaml-mode . add-node-modules-path))
 #+end_src
 
 *** Install and configure =prettier-js=
@@ -555,19 +636,17 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 #+begin_src emacs-lisp
   (use-package prettier-js
-    :hook (typescript-mode . prettier-js-mode))
+    :hook (typescript-mode . prettier-js-mode)
+    :hook (json-mode . prettier-js-mode)
+    :hook (yaml-mode . prettier-js-mode))
 #+end_src
 
-*** Install =emacs-prisma-mode=
-
-[[https://github.com/pimeys/emacs-prisma-modelink][emacs-prisma-mode]] is a nice little major mode for editing [[https://www.prisma.io/][Prisma]] schemas.
+*** Indium
 
 #+begin_src emacs-lisp
-  (use-package prisma-mode
-    :quelpa (prisma-mode :fetcher github :repo "pimeys/emacs-prisma-mode" :branch "main"))
+  (use-package indium)
 #+end_src
 
-#+RESULTS:
 
 ** Configure development adjacent major modes
 
@@ -594,7 +673,10 @@ This allows using project based installations of tools like =eslint= and =pretti
 [[https://github.com/joshwnj/json-mode][json-mode]] provides JSON file editing support.
 
 #+begin_src emacs-lisp
-  (use-package json-mode)
+  (use-package json-mode
+    :hook (json-mode . (lambda ()
+              (make-local-variable 'js-indent-level)
+              (setq js-indent-level 2))))
 #+end_src
 
 *** Install =dockerfile-mode=
@@ -660,6 +742,13 @@ First, install =auto-complete= for autocompletion.
                                          (push 'ejc-company-backend company-backends))))
 #+end_src
 
+* Configure =restclient-mode=
+
+#+begin_src emacs-lisp :output silent
+  (use-package restclient
+    :mode (("\\.http\\'" . restclient-mode)))
+#+end_src
+
 * Configure =eshell=
 
 [[https://www.gnu.org/software/emacs/manual/html_mono/eshell.html][eshell]] is a shell-like command interpreter implemented entirely in Emacs Lisp.
@@ -706,12 +795,10 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
       current buffer's file. The eshell is renamed to match that
       directory to make multiple eshell windows easier."
     (interactive)
-    (let* ((height (/ (window-total-height) 3)))
+    (let* ((height (/ (window-total-height) 4)))
       (split-window-vertically (- height))
       (other-window 1)
-      (eshell "new")
-      (insert (concat "ls"))
-      (eshell-send-input)))
+      (eshell "new")))
 
   (bind-key "C-!" 'eshell-here)
 #+end_src
@@ -736,8 +823,8 @@ Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 =eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
 
 #+begin_src emacs-lisp
-  (setq eshell-visual-command '("htop" "top" "less" "more" "screen"))
-  (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh"))
+  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node"))
+  (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh" "yarn" "npm" "docker" "docker-compose"))
 #+end_src
 
 Related: set Unix Pager to be the =cat= command.
