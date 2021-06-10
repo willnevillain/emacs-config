@@ -373,19 +373,6 @@ It provides features and functions that operate on the project level, such as ju
     (add-to-list 'projectile-globally-ignored-directories "node_modules")) ;; Never search in
 #+end_src
 
-** Integrate with =helm=
-
-[[https://github.com/bbatsov/helm-projectile][helm-projectile]] provides =helm= integration for =projectile= - it's written by the same author as =projectile=, the prolific [[https://github.com/bbatsov][Bozhidar Batsov]].
-
-#+begin_src emacs-lisp
-  ;; (use-package helm-projectile
-  ;;   :bind (("C-c v" . helm-projectile)
-  ;;          ("C-c f" . helm-projectile-find-file)
-  ;;          ("C-c b" . helm-projectile-switch-to-buffer)
-  ;;          ("C-c s" . helm-do-ag-project-root)
-  ;;          ("C-c w" . helm-projectile-switch-project)))
-#+end_src
-
 * Cofigure =magit=
 
 [[https://github.com/magit/magit][magit]] is a Git porcelain for Emacs, and honestly one of the killer apps of Emacs.
@@ -398,7 +385,9 @@ It provides features and functions that operate on the project level, such as ju
 [[https://github.com/alphapapa/magit-todos][magit-todos]] for visualizing =TODO= items marked across the source.
 
 #+begin_src emacs-lisp
-  (use-package magit-todos)
+  (use-package magit-todos
+    :diminish magit-todos-mode
+    :config (magit-todos-mode t))
 #+end_src
 
 * Programming environment
@@ -443,9 +432,11 @@ Anything related to a specific programming language, or programming major mode a
 
 Currently I only do Backend Node.js TypeScript programming - as a result there is slim support for anything pertaining to the web or vanilla JS at this time.
 
-*** Install and configure =tide=
+Configuration assumes that you have =eslint= and =prettier= installed for projects, either globally or project locally should be fine.
 
-[[https://github.com/ananthakumaran/tide][tide]] is an IDE for TypeScript for Emacs.
+*** Install and configure =lsp-mode=
+
+Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
 #+begin_src emacs-lisp
   (use-package typescript-mode)
@@ -480,6 +471,8 @@ Currently I only do Backend Node.js TypeScript programming - as a result there i
 
 *** Node version management with =nvm=
 
+Load correct nvm version based off of =.nvmrc=.
+
 #+begin_src emacs-lisp
   (use-package nvm
     :hook (typescript-mode . nvm-use-for))
@@ -512,6 +505,8 @@ This allows using project based installations of tools like =eslint= and =pretti
 #+end_src
 
 *** Indium
+
+Debugger - I don't know how to use this yet.
 
 #+begin_src emacs-lisp
   (use-package indium)
@@ -584,34 +579,6 @@ The [[https://github.com/abrochard][author]] gave an interesting talk about how 
   (use-package kubel)
 #+end_src
 
-* Configure =ejc-sql=
-
-[[https://github.com/kostafey/ejc-sql][ejc-sql]] is an Emacs SQL client
-
-First, install =auto-complete= for autocompletion.
-
-#+begin_src emacs-lisp
-  (use-package auto-complete)
-#+end_src
-
-#+begin_src emacs-lisp
-  (use-package ejc-sql
-    :bind (("C-c e b" . ejc-get-temp-editor-buffer))
-    :config
-    (setq clomacs-httpd-default-port 8090)
-    (setq ejc-completion-system 'standard)
-    (add-hook 'ejc-sql-minor-mode-hook (lambda ()
-                                         ;; eldoc
-                                         (ejc-eldoc-setup)
-
-                                         ;; autocompletion
-                                         (auto-complete-mode t)
-                                         (ejc-ac-setup)
-
-                                         ;; company-mode support (global-company enabled)
-                                         (push 'ejc-company-backend company-backends))))
-#+end_src
-
 * Configure =restclient-mode=
 
 #+begin_src emacs-lisp :output silent
@@ -676,10 +643,6 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
 Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 
 #+begin_src emacs-lisp
-  ;; (add-hook 'eshell-mode-hook ;; Bind key to view preconfigured Helm view of eshell history
-  ;;           (lambda ()
-  ;;             (define-key eshell-mode-map (kbd "M-r") 'helm-eshell-history)))
-
   (defun eshell-pop--kill-and-delete-window ()
     "Used on eshell exit hook, will delete the window if not the only one in the frame"
     (unless (one-window-p)
@@ -750,6 +713,9 @@ Any utility functions that are used at a global level go here.
 #+end_src
 
 ** Toggle font size for streaming mode
+
+This function is pretty wild and probably horrible but it works - used for toggling font size when doing coding streams.
+
 #+begin_src emacs-lisp
   (defun willnevillain/toggle-stream-fontsize ()
     "Toggle the font size between default and large for streaming"
