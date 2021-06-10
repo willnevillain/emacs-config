@@ -214,68 +214,45 @@ Very minimal modeline, trim of the original modeline with some custom symbols fo
 
 You can manage novel planning, spreadsheets, personal and project TODO management, write research papers...whatever you want basically, and org-mode has a way to make it easier.
 
-The current state of my =org-mode= config is very pared down as I manage all my TODOs in [[https://todoist.com/][Todoist]] and have no plans to migrate off of it anytime soon.
+I use org-mode currently for daily task tracking and project management. I use =Todoist= for some critical timed / repeating tasks (e.g. =pay your credit card bills=).
 
-Historically I have managed /_everything_/ in org files, but there were occasional syncing or merge quirks that caused me to lose enough data that I migrated off of it.
-
-This configuration will grow depending on my increased usage of =org-mode=.
-
-** Set environment - important keybindings and =org-indent-mode= hook
+** Core configuration
 
 #+begin_src emacs-lisp
-  (add-to-list 'org-modules 'org-habit t)
-
   (use-package org
-    :bind (("C-c l" . org-store-link)
-           ("C-c a" . org-agenda)
-           ("C-c c" . org-capture))
+    :init
+    (add-to-list 'org-modules 'org-habit t)
+
+    :config
+    (setq org-directory "~/Dropbox/org"
+           org-log-repeat "time"
+           org-deadline-warning-days 5)
+
+    :bind
+    (("C-c l" . org-store-link)
+     ("C-c a" . org-agenda)
+     ("C-c c" . org-capture)
+     ("C-c M-o" . org-switchb))
+
     :hook (org-mode . org-indent-mode))
 #+end_src
 
-** Set org file location
-
-I keep all org files in Dropbox.
-
-#+begin_src emacs-lisp
-  (setq org-directory "~/Dropbox/org")
-#+end_src
+** Configure agenda
 
 Likewise, agenda files will live in Dropbox.
 
 #+begin_src emacs-lisp
+  (setq org-agenda-skip-scheduled-if-done t
+        org-agenda-custom-commands '(("p" tags "PROJECT" nil)
+                                     ("d" "Dashboard" ((agenda "" ((org-deadline-warning-days 7)))
+                                                       (tags "PROJECT-MAYBE" ((org-agenda-overriding-header "Active Projects")))))))
+
   (defun willnevillain/set-org-agenda-files ()
+    "Utility function to refresh org-agenda-files recursively in org-directory if any new files have been added."
     (interactive)
     (setq org-agenda-files (directory-files-recursively org-directory "org$")))
 
   (willnevillain/set-org-agenda-files)
-
-  (setq org-agenda-custom-commands
-        '(("p" tags "PROJECT" nil)
-          ("d" "Dashboard" (
-                            (agenda ""
-                                    ((org-deadline-warning-days 7)))
-                            (tags "PROJECT-MAYBE"
-                                  ((org-agenda-overriding-header "Active Projects")))))))
-#+end_src
-
-** Timed task configuration tweaks
-
-Log completion time of repeated tasks.
-
-#+begin_src emacs-lisp
-  (setq org-log-repeat "time")
-#+end_src
-
-Hide scheduled items from agenda view if they're already done.
-
-#+begin_src emacs-lisp
-  (setq org-agenda-skip-scheduled-if-done t)
-#+end_src
-
-Start showing upcoming deadlines in agenda 5 days in advance - default of 14 days is too much for me.
-
-#+begin_src emacs-lisp
-  (setq org-deadline-warning-days 5)
 #+end_src
 
 ** Configure todo keywords
@@ -287,8 +264,6 @@ Start showing upcoming deadlines in agenda 5 days in advance - default of 14 day
 #+end_src
 
 ** Configure additional export options
-
-*** GitHub Flavored Markdown (gfm)
 
 [[https://github.com/larstvei/ox-gfm][ox-gfm]] adds support for export org files to GitHub Flavored Markdown.
 
@@ -306,28 +281,9 @@ We define the languages that we want =org-babel= to execute.
   (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
 #+end_src
 
-** Configure =org-mode= utility functions
-
-*** Get absolute path of file in =org-directory=
-
-#+begin_src emacs-lisp
-  (defun org-file-path (filename)
-      "Return the absolute address of an org file, given its relative name."
-      (concat (file-name-as-directory org-directory) filename))
-#+end_src
-
-*** Jump to file in =org-directory= w/Ivy
-
-#+begin_src emacs-lisp
-  (defun willnevillain/org-find-file ()
-      "Leverage Ivy to quickly open any org files."
-      (interactive)
-      (find-file (org-file-path (ivy-read "Select org file: " (directory-files org-directory nil "\.org$")))))
-
-  (global-set-key (kbd "C-c M-o") 'willnevillain/org-find-file)
-#+end_src
-
 ** Configure capture templates
+
+For those not in the know, if you want to call a function when declaring a list with ='()=, use =`()= and then preface your function call with =,=.
 
 #+begin_src emacs-lisp
   (setq org-capture-templates
@@ -337,62 +293,66 @@ We define the languages that we want =org-babel= to execute.
 
 ** Configure org-refile
 
+This configuration is mainly to allow refiling subtrees to the root of a new file - see [[https://blog.aaronbieber.com/2017/03/19/organizing-notes-with-refile.html][this blog post for details]].
+
 #+begin_src emacs-lisp
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
-  (setq org-refile-use-outline-path 'file)
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3))
+        org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil
+        org-refile-allow-creating-parent-nodes 'confirm)
 #+end_src
 
 * Configure =org-roam=
 
 #+begin_src emacs-lisp
-  (defun willnevillain/create-or-find-org-roam-daily-note ()
-      (interactive)
-      (if (file-exists-p (concat "~/Dropbox/org/daily/" (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
-          (org-roam-dailies-find-today)
-        (org-roam-dailies-capture-today)))
+  (use-package org-roam
+    :diminish org-roam-mode
+    :config
+    (progn
+      (setq org-roam-directory org-directory
+            org-roam-dailies-directory "daily/"
+            org-roam-dailies-capture-templates `(("d" "default" entry
+                                                  #'org-roam-capture--get-point
+                                                  ,(concat
+                                                    "* Tasks\n"
+                                                    "* Work Focuses\n"
+                                                    "* Journal\n"
+                                                    "** Morning\n"
+                                                    "** Evening\n"
+                                                    "* Checklists\n"
+                                                    "** Morning\n"
+                                                    "- [ ] Check notebook, Todoist =Inbox= and inbox.org for incoming items\n"
+                                                    "- [ ] Check Todoist =Today= and yesterday's daily note for overflow items\n"
+                                                    "- [ ] Ensure Todoist and Emacs task states in sync\n"
+                                                    "- [ ] Sort and prioritize new items\n"
+                                                    "- [ ] Add personal and work 'must dos' to docket, and work focuses if applicable\n"
+                                                    "- [ ] Reflect on 'want to dos' and projects\n"
+                                                    "  - [ ] Add achievables to docket\n"
+                                                    "  - [ ] Reflect on important daily habits and note when you will do them\n"
+                                                    "- [ ] Reflect on what is slated for today. Is this reasonable? Prune as necessary.\n"
+                                                    "- [ ] Journal thoughts, ambitions, goals\n"
+                                                    "** Evening\n"
+                                                    "- [ ] Check Todoist =Inbox= and inbox.org for incoming items\n"
+                                                    "- [ ] Reflect on incomplete items. What should be deprioritized, what should be overflowed?\n"
+                                                    "- [ ] Ensure Todoist and Emacs task states in sync\n"
+                                                    "- [ ] Sort and prioritize new items\n"
+                                                    "- [ ] Reflect on 'want to dos' and projects\n"
+                                                    "  - [ ] Did achievables get completed / will be completed before bed? Reflect on why.\n"
+                                                    "  - [ ] Did you do the important daily habits / will you do them before bed? Reflect on why.\n"
+                                                    "- [ ] Journal on how the day went and anything else\n")
+                                                  :file-name "daily/%<%Y-%m-%d>"
+                                                  :head "#+title: %<%Y-%m-%d>\n\n")))
+      (org-roam-mode t))
+    :bind ("C-c M-p" . org-roam-dailies-find-previous-note))
 
-    (use-package org-roam
-      :diminish org-roam-mode
-      :config
-      (progn
-        (setq org-roam-directory org-directory
-              org-roam-dailies-directory "daily/"
-              org-roam-dailies-capture-templates      `(("d" "default" entry
-                                                         #'org-roam-capture--get-point
-                                                         ,(concat
-                                                           "* Tasks\n"
-                                                           "* Work Focuses\n"
-                                                           "* Journal\n"
-                                                           "** Morning\n"
-                                                           "** Evening\n"
-                                                           "* Checklists\n"
-                                                           "** Morning\n"
-                                                           "- [ ] Check notebook, Todoist =Inbox= and inbox.org for incoming items\n"
-                                                           "- [ ] Check Todoist =Today= and yesterday's daily note for overflow items\n"
-                                                           "- [ ] Ensure Todoist and Emacs task states in sync\n"
-                                                           "- [ ] Sort and prioritize new items\n"
-                                                           "- [ ] Add personal and work 'must dos' to docket, and work focuses if applicable\n"
-                                                           "- [ ] Reflect on 'want to dos' and projects\n"
-                                                           "  - [ ] Add achievables to docket\n"
-                                                           "  - [ ] Reflect on important daily habits and note when you will do them\n"
-                                                           "- [ ] Reflect on what is slated for today. Is this reasonable? Prune as necessary.\n"
-                                                           "- [ ] Journal thoughts, ambitions, goals\n"
-                                                           "** Evening\n"
-                                                           "- [ ] Check Todoist =Inbox= and inbox.org for incoming items\n"
-                                                           "- [ ] Reflect on incomplete items. What should be deprioritized, what should be overflowed?\n"
-                                                           "- [ ] Ensure Todoist and Emacs task states in sync\n"
-                                                           "- [ ] Sort and prioritize new items\n"
-                                                           "- [ ] Reflect on 'want to dos' and projects\n"
-                                                           "  - [ ] Did achievables get completed / will be completed before bed? Reflect on why.\n"
-                                                           "  - [ ] Did you do the important daily habits / will you do them before bed? Reflect on why.\n"
-                                                           "- [ ] Journal on how the day went and anything else\n")
-                                                         :file-name "daily/%<%Y-%m-%d>"
-                                                         :head "#+title: %<%Y-%m-%d>\n\n")))
-        (org-roam-mode t))
-      :bind (("C-c M-t" . willnevillain/create-or-find-org-roam-daily-note)
-             ("C-c M-p" . org-roam-dailies-find-previous-note)))
+  (defun willnevillain/create-or-find-org-roam-daily-note ()
+    "Find the org-roam daily note for today, or create it if it does not exist."
+    (interactive)
+    (if (file-exists-p (concat "~/Dropbox/org/daily/" (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
+        (org-roam-dailies-find-today)
+      (org-roam-dailies-capture-today)))
+
+  (global-set-key (kbd "C-c M-t") 'willnevillain/create-or-find-org-roam-daily-note)
 #+end_src
 
 * Configure =projectile=
