@@ -177,44 +177,11 @@ Very minimal modeline, trim of the original modeline with some custom symbols fo
                                    ))
 #+end_src
 
-* Configure =helm=
+* Configure =ivy=
 
-[[https://github.com/emacs-helm/helm][helm]] and similar projects can be hard to describe; =helm= describes itself as an "incremental completion and selection narrowing framework".
-
-In as crude of laymans terms as possible, when you do something that returns many results, =helm= makes it easier to find the result for which you are looking.
-
-** Fuzzy match package dependencies
-
-[[https://github.com/lewang/flx][flx]] provides Sublime style fuzzy text matching.
-We can get =helm= support for =flx= via [[https://github.com/PythonNut/helm-flx][helm-flx]].
+** Install =ivy=, rebind common functions, fuzzy match everywhere
 
 #+begin_src emacs-lisp
-  (use-package flx)
-  (use-package helm-flx)
-#+end_src
-
-** Install =helm=, rebind common functions, fuzzy match everywhere
-
-#+begin_src emacs-lisp
-  ;; (use-package helm
-  ;;   :demand ;; Do not defer regardless of circumstances
-  ;;   :diminish helm-mode
-  ;;   :bind (("M-x" . helm-M-x) ;; Helm interactive function completion
-  ;;          ("M-y" . helm-show-kill-ring) ;; Helm kill ring
-  ;;          ("C-x b" . helm-mini) ;; Helm buffers list
-  ;;          ("C-x C-b" . helm-mini) ;; Almost every time I hit C-x C-b I meant to hit C-x b
-  ;;          ("C-x C-f" . helm-find-files)) ;; Helm find files
-  ;;   :config
-  ;;   (helm-mode 1)
-  ;;   (helm-flx-mode 1)
-  ;;   (setq helm-mode-fuzzy-match t   ;; Fuzzy match config
-  ;;         helm-buffers-fuzzy-matching t
-  ;;         helm-lisp-fuzzy-completion t
-  ;;         helm-locate-fuzzy-match t
-  ;;         helm-M-x-fuzzy-match t
-  ;;         helm-recentf-fuzzy-match t)
-  ;;   (setq helm-buffer-max-length 48))
-
   (use-package counsel
     :bind (("C-s" . swiper)
            ("M-x" . counsel-M-x)
@@ -228,41 +195,17 @@ We can get =helm= support for =flx= via [[https://github.com/PythonNut/helm-flx]
     :diminish ivy-mode
     :config
     (ivy-mode t)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-height 15)
-    (setq ivy-count-format "(%d/%d) "))
+    (setq ivy-use-virtual-buffers t
+          ivy-height 15
+          ivy-count-format "(%d/%d) "
+          ivy-extra-directories nil
+          ivy-re-builders-alist '((t . ivy--regex-fuzzy))))
 
   (use-package counsel-projectile
     :diminish counsel-projectile-mode
     :config
     (counsel-projectile-mode t)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-#+end_src
-
-** Configure =ripgrep= via =helm-ag= as search tool
-
-[[https://github.com/emacsorphanage/helm-ag][helm-ag]] allows using [[https://github.com/ggreer/the_silver_searcher][The Silver Searcher]] as your underlying search tool in place of the default (probably =grep=).
-
-However, the project [[https://github.com/BurntSushi/ripgrep][ripgrep]] exisxts, and is currently the fastest search tool available.
-
-There exists a project [[https://github.com/cosmicexplorer/helm-rg][helm-rg]] to provide a =helm= interface for =ripgrep= specifically, but for whatever reason I've run into issues with this.
-
-As a workaround, I use =helm-ag= and configure base command to run the =ripgrep= executable, which has worked perfectly.
-
-#+begin_src emacs-lisp
-  ;; (use-package ag)
-  ;; (use-package helm-ag
-  ;;   :config
-  ;;   (setq helm-ag-base-command "rg --no-heading"))
-#+end_src
-
-** Install =helm-xref=
-
-[[https://github.com/brotzeit/helm-xref][helm-xref]] provides a =helm= interface for results of the built-in [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]].
-
-#+begin_src emacs-lisp
-  ;; (use-package helm-xref)
-
 #+end_src
 
 * Configure =org-mode=
