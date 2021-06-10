@@ -6,10 +6,9 @@
 
 For this configuration to work correctly, the following dependencies must be installed on your system.
 
-- ripgrep
-- optional: Hack font
-- optional: project local installations of eslint for JS / TS projects
-- optional: project local installations of prettier for JS / TS projects
+- =ripgrep= for fast searching.
+- =graphviz= for =org-roam= graph.
+- =JetBrains Mono font=.
 
 * SSL config
 
@@ -35,18 +34,9 @@ Allows for pulling from =https= package archives.
 Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#garbage-collection-tuning][abrochard config]].
 
 #+begin_src emacs-lisp
-  (defmacro k-time (&rest body)
-    "Measure and return the time it takes evaluating BODY."
-    `(let ((time (current-time)))
-       ,@body
-       (float-time (time-since time))))
-
   ;; When idle for 30sec run the GC no matter what.
   (defvar k-gc-timer
-    (run-with-idle-timer 30 t
-                         (lambda ()
-                           (message "Garbage Collector has run for %.06fsec"
-                                    (k-time (garbage-collect))))))
+    (run-with-idle-timer 30 t (garbage-collect)))
 
   ;; Set garbage collection threshold to 1GB.
   (setq gc-cons-threshold #x40000000)
@@ -122,12 +112,6 @@ Do not make an audible noise when attempting to do something invalid.
   (setq ring-bell-function 'ignore)
 #+end_src
 
-Show column numbers in the modeline, and show line numbers on the left side.
-
-#+begin_src emacs-lisp
-  (setq column-number-mode t)
-#+end_src
-
 Ask for confirmation before quitting - remove pain of accidental =C-x C-c= fat fingers.
 
 #+begin_src emacs-lisp
@@ -151,33 +135,16 @@ Auto-indent on =RET= in addition to usual =C-j=.
 [[https://draculatheme.com/emacs][dracula]] is a stylish and spooky dark theme.
 
 #+begin_src emacs-lisp
-  ;; (use-package dracula-theme
-  ;;   :config
-  ;;   (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
-
-  (use-package modus-themes
-    :init
-    (setq modus-themes-slanted-constructs t
-          modus-themes-bold-constructs nil
-          modus-themes-region 'no-extend)
-    (modus-themes-load-themes)
-
+  (use-package dracula-theme
     :config
-    (modus-themes-load-vivendi))
+    (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
+
+  (load-theme 'dracula t)
 #+end_src
-
-Load the theme.
-
-#+begin_src emacs-lisp
-  ;; (load-theme 'dracula t)
-#+end_src
-
-#+RESULTS:
-: t
 
 ** Font
 
-Use the [[https://sourcefoundry.org/hack/][Hack]] font if installed on the system.
+Use the [[https://www.jetbrains.com/lp/mono/][JetBrains Mono]] font if installed on the system.
 
 #+begin_src emacs-lisp
   (if (condition-case nil
