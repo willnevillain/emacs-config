@@ -218,15 +218,15 @@ I use org-mode currently for daily task tracking and project management. I use =
 ** Core configuration
 
 #+begin_src emacs-lisp
-  (require 'org-habit)
-
   (use-package org
-    :after org-habit
 
     :config
     (setq org-directory "~/Dropbox/org"
            org-log-repeat "time"
            org-deadline-warning-days 5)
+
+    (require 'org-habit)
+    (add-to-list 'org-modules 'org-habit)
 
     :bind
     (("C-c l" . org-store-link)
