@@ -218,9 +218,10 @@ I use org-mode currently for daily task tracking and project management. I use =
 ** Core configuration
 
 #+begin_src emacs-lisp
+  (require 'org-habit)
+
   (use-package org
-    :init
-    (add-to-list 'org-modules 'org-habit t)
+    :after org-habit
 
     :config
     (setq org-directory "~/Dropbox/org"
@@ -306,6 +307,7 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
 #+begin_src emacs-lisp
   (use-package org-roam
     :diminish org-roam-mode
+    :commands org-roam-mode
     :config
     (progn
       (setq org-roam-directory org-directory
@@ -313,17 +315,16 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
             org-roam-dailies-capture-templates `(("d" "default" entry
                                                   #'org-roam-capture--get-point
                                                   ,(concat
-                                                    "* Tasks\n"
                                                     "* Work Focuses\n"
                                                     "* Journal\n"
                                                     "** Morning\n"
                                                     "** Evening\n"
                                                     "* Checklists\n"
                                                     "** Morning\n"
-                                                    "- [ ] Check notebook, Todoist =Inbox= and inbox.org for incoming items\n"
+                                                    "- [ ] Check notebook, Todoist =Inbox= and =inbox.org= for incoming items\n"
                                                     "- [ ] Check Todoist =Today= and yesterday's daily note for overflow items\n"
                                                     "- [ ] Ensure Todoist and Emacs task states in sync\n"
-                                                    "- [ ] Sort and prioritize new items\n"
+                                                    "- [ ] Sort and prioritize new items in =tasks.org=\n"
                                                     "- [ ] Add personal and work 'must dos' to docket, and work focuses if applicable\n"
                                                     "- [ ] Reflect on 'want to dos' and projects\n"
                                                     "  - [ ] Add achievables to docket\n"
@@ -340,9 +341,11 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
                                                     "  - [ ] Did you do the important daily habits / will you do them before bed? Reflect on why.\n"
                                                     "- [ ] Journal on how the day went and anything else\n")
                                                   :file-name "daily/%<%Y-%m-%d>"
-                                                  :head "#+title: %<%Y-%m-%d>\n\n")))
-      (org-roam-mode t))
+                                                  :head "#+title: %<%Y-%m-%d>\n\n"))))
+
     :bind ("C-c M-p" . org-roam-dailies-find-previous-note))
+
+  (org-roam-mode t)
 
   (defun willnevillain/create-or-find-org-roam-daily-note ()
     "Find the org-roam daily note for today, or create it if it does not exist."
@@ -350,7 +353,6 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
     (if (file-exists-p (concat "~/Dropbox/org/daily/" (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
         (org-roam-dailies-find-today)
       (org-roam-dailies-capture-today)))
-
   (global-set-key (kbd "C-c M-t") 'willnevillain/create-or-find-org-roam-daily-note)
 #+end_src
 
