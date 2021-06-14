@@ -198,7 +198,6 @@ Very minimal modeline, trim of the original modeline with some custom symbols fo
     (setq ivy-use-virtual-buffers t
           ivy-height 15
           ivy-count-format "(%d/%d) "
-          ivy-extra-directories nil
           ivy-re-builders-alist '((t . ivy--regex-fuzzy))))
 
   (use-package counsel-projectile
