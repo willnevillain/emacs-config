@@ -36,7 +36,7 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
 #+begin_src emacs-lisp
   ;; When idle for 30sec run the GC no matter what.
   (defvar k-gc-timer
-    (run-with-idle-timer 30 t (garbage-collect)))
+    (run-with-idle-timer 30 t (lambda () (garbage-collect))))
 
   ;; Set garbage collection threshold to 1GB.
   (setq gc-cons-threshold #x40000000)
