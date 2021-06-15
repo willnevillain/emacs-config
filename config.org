@@ -231,10 +231,16 @@ I use org-mode currently for daily task tracking and project management. I use =
     :bind
     (("C-c l" . org-store-link)
      ("C-c a" . org-agenda)
-     ("C-c c" . org-capture)
-     ("C-c M-o" . org-switchb))
+     ("C-c c" . org-capture))
 
     :hook (org-mode . org-indent-mode))
+
+  (defun willnevillain/org-find-file ()
+    "Quickly open any org file in org-directory (non-recursive)."
+    (interactive)
+    (find-file (expand-file-name (ivy-read "Select file: " (directory-files org-directory nil "\.org$")) org-directory)))
+
+  (global-set-key (kbd "C-c M-o") 'willnevillain/org-find-file)
 #+end_src
 
 ** Configure agenda
@@ -243,6 +249,7 @@ Likewise, agenda files will live in Dropbox.
 
 #+begin_src emacs-lisp
   (setq org-agenda-skip-scheduled-if-done t
+        org-agenda-files `(,org-directory)
         org-agenda-custom-commands '(("p" tags "PROJECT" nil)
                                      ("d" "Dashboard" ((agenda "" ((org-deadline-warning-days 7)))
                                                        (tags "PROJECT-MAYBE" ((org-agenda-overriding-header "Active Projects")))))))
@@ -250,7 +257,7 @@ Likewise, agenda files will live in Dropbox.
   (defun willnevillain/set-org-agenda-files ()
     "Utility function to refresh org-agenda-files recursively in org-directory if any new files have been added."
     (interactive)
-    (setq org-agenda-files (directory-files-recursively org-directory "org$")))
+    (setq org-agenda-files org-directory))
 
   (willnevillain/set-org-agenda-files)
 #+end_src
@@ -310,7 +317,7 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
     :commands org-roam-mode
     :config
     (progn
-      (setq org-roam-directory org-directory
+      (setq org-roam-directory (concat org-directory "/roam")
             org-roam-dailies-directory "daily/"
             org-roam-dailies-capture-templates `(("d" "default" entry
                                                   #'org-roam-capture--get-point
@@ -350,7 +357,7 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
   (defun willnevillain/create-or-find-org-roam-daily-note ()
     "Find the org-roam daily note for today, or create it if it does not exist."
     (interactive)
-    (if (file-exists-p (concat "~/Dropbox/org/daily/" (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
+    (if (file-exists-p (concat org-roam-directory "/" org-roam-dailies-directory (shell-command-to-string "echo -n $(date +%Y-%m-%d)") ".org"))
         (org-roam-dailies-find-today)
       (org-roam-dailies-capture-today)))
   (global-set-key (kbd "C-c M-t") 'willnevillain/create-or-find-org-roam-daily-note)
