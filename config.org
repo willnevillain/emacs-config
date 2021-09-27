@@ -132,49 +132,45 @@ Auto-indent on =RET= in addition to usual =C-j=.
 
 ** Theme
 
-[[https://draculatheme.com/emacs][dracula]] is a stylish and spooky dark theme.
+=dracula= as the theme, but via the =doom-themes= package.
 
 #+begin_src emacs-lisp
-  (use-package dracula-theme
-    :config
-    (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
+  ;; (use-package dracula-theme
+  ;;   :config
+  ;;   (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
 
-  (load-theme 'dracula t)
-#+end_src
+  ;; (load-theme 'dracula t)
 
-** Font
-
-Use the [[https://www.jetbrains.com/lp/mono/][JetBrains Mono]] font if installed on the system.
-
-#+begin_src emacs-lisp
-  (if (condition-case nil
-          (x-list-fonts "JetBrains Mono")
-        (error nil))
-      (progn
-        (add-to-list 'default-frame-alist '(font . "JetBrains Mono-14"))
-        (set-face-attribute 'default nil :font "JetBrains Mono-14")))
+  (use-package doom-themes
+    :init (load-theme 'doom-dracula t))
 #+end_src
 
 #+RESULTS:
 
-** Custom modeline
+** Font
 
-Very minimal modeline, trim of the original modeline with some custom symbols for style.
+FiraCode as font.
 
 #+begin_src emacs-lisp
-  (setq-default mode-line-format '(" 𝛌"
-                                   mode-line-front-space
-                                   mode-line-modified
-                                   " "
-                                   "%[" mode-line-buffer-identification "%]"
-                                   "  "
-                                   mode-line-modes
-                                   mode-line-misc-info
-                                   " "
-                                   (:propertize " " display ((space :align-to (- right 1))))
-                                   mode-line-end-spaces
-                                   "☉"
-                                   ))
+  (set-face-attribute 'default nil :font "Fira Code Retina" :height 128)
+
+  ;; Set the fixed pitch face
+  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 128)
+
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil :font "Input Sans" :height 128 :weight 'regular)
+#+end_src
+
+** Custom modeline
+
+Using =doom-modeline= because it's minimal yet excellent out of the box. With =all-the-icons= support!
+
+#+begin_src emacs-lisp
+  (use-package all-the-icons)
+
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 15)))
 #+end_src
 
 * Configure =ivy=
@@ -198,13 +194,159 @@ Very minimal modeline, trim of the original modeline with some custom symbols fo
     (setq ivy-use-virtual-buffers t
           ivy-height 15
           ivy-count-format "(%d/%d) "
-          ivy-re-builders-alist '((t . ivy--regex-fuzzy))))
+          ivy-re-builders-alist '((read-file-name-internal . ivy--regex-fuzzy)
+                                  (t . ivy--regex-plus))))
 
   (use-package counsel-projectile
     :diminish counsel-projectile-mode
     :config
     (counsel-projectile-mode t)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+#+end_src
+
+* Chinese
+
+All of this copied near-verbatim (besides paths) from Josh Moller-Mara.
+Notably I've commented out anything pertaining to =cangjie= as it's not currently relevant to me.
+If this is relevant to you, see Josh's dotfiles.
+See Josh's full dotfiles [[https://github.com/mm--/dot-emacs][here]] as well as the talk on using Emacs to learn Chinese [[https://www.youtube.com/watch?v=uraPXeLfWcM][here]].
+
+#+begin_src emacs-lisp
+  ;; Various utilities to get Cangjie codes, pinyin pronunciation, and
+  ;; definitions from a Chinese dictionary file
+  ;; - Josh Moller-Mara
+
+  ;; (defun josh/chinese-cangjie-code (str)
+  ;;   "Get the cangjie code for a string"
+  ;;   (interactive)
+  ;;   (with-temp-buffer
+  ;;     (set-input-method "Cangjie5")
+  ;;     (mapconcat (lambda (x)
+  ;;                  (upcase (mapconcat 'identity (quail-find-key (string-to-char x)) "/")))
+  ;;                (split-string str "" t)
+  ;;                " ")))
+
+  ;; (defun josh/chinese-cangjie-codes (words)
+  ;;   "Get the cangjie codes for traditional + simplified"
+  ;;   (if (listp words)
+  ;;       (format "%s\n[%s]" (josh/chinese-cangjie-code (cdr words))
+  ;;               (josh/chinese-cangjie-code (car words)))
+  ;;     (josh/chinese-cangjie-code words)))
+
+  (defvar josh/chinese-dictionary-path
+    (concat org-directory "/chinese/cedict_ts.u8")
+    "Where we store the Chinese dictionary cedict_ts.u8")
+
+  (defun josh/chinese-prompt ()
+    "Prompt for a character, return it"
+    (setq josh/chinese-word (read-from-minibuffer "Word/Phrase: ")))
+
+
+  (defun josh/chinese-dict-find (phrase)
+    "Find a chinese word or phrase in the dictionary"
+    (with-temp-buffer
+      (insert-file-contents josh/chinese-dictionary-path)
+      (let (definitions)
+        (while (re-search-forward (concat "^[^][]*\\b" phrase "\\b.*?$") nil t)
+          (push (buffer-substring (match-beginning 0)
+                                  (match-end 0))
+                definitions))
+        (setq josh/chinese-word-dict
+             (if (equal (length definitions) 1)
+                 (car definitions)
+               (ivy-read "Pick a definition: "
+                               definitions
+                               :nomark t))))))
+
+  (defun josh/chinese-get-pronunciation (dictentry)
+    "Get a pronunciation from a dictionary entry."
+    (let ((pronunciation (save-match-data
+                           (and (string-match "\\[\\(.*?\\)\\]" dictentry)
+                                (match-string 1 dictentry)))))
+      (with-temp-buffer
+        (set-input-method "chinese-sisheng")
+        (mapconcat (lambda (x)
+                     (let ((translation (quail-map-definition
+                                          (quail-lookup-key x))))
+                            (or (if (listp translation)
+                                          (elt (cdr translation) 0)
+                                  (char-to-string translation)) ;sisheng doesn't have 5th tone
+                                (substring x 0 -1))))
+                   (split-string pronunciation " " t)
+                   " "))))
+
+  (defun josh/chinese-get-definition (dictentry)
+    "Get a definition from a dictionary entry."
+    (save-match-data
+      (and (string-match "/\\(.*?\\)$" dictentry)
+           (mapconcat 'identity
+                      (split-string (match-string 1 dictentry) "/" t)
+                      "\n"))))
+
+  (defun josh/chinese-get-word (dictentry)
+    "Return either the character, or a list of traditional and simplified."
+    (let* ((words (save-match-data
+                    (and (string-match "^\\(.+?\\) \\(.+?\\)\\b" dictentry)
+                         (cons (match-string 1 dictentry)
+                               (match-string 2 dictentry)))))
+           (traditional (car words))
+           (simplified (cdr words)))
+      (if (equal traditional simplified)
+          (setq josh/chinese-words traditional)
+        (setq josh/chinese-words words)
+        (format "%s [%s]" simplified traditional))))
+
+  (defun josh/chinese-def-at-point (&optional arg)
+    "Get the definition of a character at the point and display in
+  the minibuffer. With an argument, insert the definition into the
+  buffer."
+    (interactive "P")
+    (let ((phrase (if (use-region-p)
+                      (buffer-substring-no-properties (region-beginning) (region-end))
+                    (string (char-after))))
+          definitions)
+      (with-temp-buffer
+        (insert-file-contents josh/chinese-dictionary-path)
+        (while (re-search-forward (concat "^[^][]*\\b" phrase "\\b.*?$") nil t)
+            (push (buffer-substring (match-beginning 0)
+                                    (match-end 0))
+                  definitions)))
+      (let ((defs (mapconcat 'identity definitions "\n")))
+            (if arg
+                (insert defs)
+              (message defs)))))
+
+  (defvar josh/chinese-decomposition-path
+    (concat org-directory "/chinese/cjk-decomp-0.4.0.txt")
+    "Where we store the Chinese character decomposition data")
+
+  (defun josh/chinese-decomposition-find (phrase)
+    "Find a chinese word or phrase in the dictionary"
+    (defun str-decomp (strnum)
+      (if (and strnum (= (string-to-number strnum) 0))
+          strnum
+        (josh/chinese-decomposition-find strnum)))
+    (with-temp-buffer
+      (insert-file-contents josh/chinese-decomposition-path)
+      (let (definitions)
+        (when (re-search-forward (concat "^" phrase ":.*?$") nil t)
+          (let ((decomp (buffer-substring (match-beginning 0)
+                                          (match-end 0))))
+            (save-match-data
+              (string-match "^\\(.*?\\):\\(.*?\\)(\\(.*?\\))$" decomp)
+              (let* ((decomptype (match-string 2 decomp))
+                     (constituents (split-string (match-string 3 decomp) "[,()]")))
+                (cons decomptype (mapcar 'str-decomp constituents)))))))))
+
+  (defun josh/chinese-decomposition-at-point ()
+    "Get the decomposition of a character at the point and insert it."
+    (interactive)
+    (defun listtostr (x)
+      (if (listp x)
+          (mapconcat 'listtostr x "")
+        x))
+    (let ((phrase (string (char-after))))
+      (insert (listtostr (josh/chinese-decomposition-find phrase)))))
 #+end_src
 
 * Configure =org-mode=
@@ -231,7 +373,9 @@ I use org-mode currently for daily task tracking and project management. I use =
     :bind
     (("C-c l" . org-store-link)
      ("C-c a" . org-agenda)
-     ("C-c c" . org-capture))
+     ("C-c c" . org-capture)
+     :map org-mode-map
+     ("C-c C-q" . counsel-org-tag))
 
     :hook (org-mode . org-indent-mode))
 
@@ -252,14 +396,13 @@ Likewise, agenda files will live in Dropbox.
         org-agenda-files `(,org-directory)
         org-agenda-custom-commands '(("p" tags "PROJECT" nil)
                                      ("d" "Dashboard" ((agenda "" ((org-deadline-warning-days 7)))
-                                                       (tags "PROJECT-MAYBE" ((org-agenda-overriding-header "Active Projects")))))))
+                                                       (tags "+PROJECT+ACTIVE" ((org-agenda-overriding-header "Active Projects")))
+                                                       (tags "+PROJECT-ACTIVE+LEVEL=1|+PROJECT-ACIVE+LEVEL=2" ((org-agenda-overriding-header "Inactive Projects")))))))
 
   (defun willnevillain/set-org-agenda-files ()
     "Utility function to refresh org-agenda-files recursively in org-directory if any new files have been added."
     (interactive)
-    (setq org-agenda-files org-directory))
-
-  (willnevillain/set-org-agenda-files)
+    (setq org-agenda-files `(,org-directory)))
 #+end_src
 
 ** Configure todo keywords
@@ -267,7 +410,6 @@ Likewise, agenda files will live in Dropbox.
 #+begin_src emacs-lisp
   (setq org-todo-keywords
         '((sequence "TODO(t!)" "|" "DONE(d!)")))
-  (setq org-treat-insert-todo-heading-as-state-change t)
 #+end_src
 
 ** Configure additional export options
@@ -295,7 +437,17 @@ For those not in the know, if you want to call a function when declaring a list 
 #+begin_src emacs-lisp
   (setq org-capture-templates
         `(("i" "Inbox Item" entry (file ,(expand-file-name "inbox.org" org-directory))
-           "* %?\nCaptured: %U\n")))
+           "* %?\nCaptured: %U\n")
+          ("c" "Chinese Word" entry
+           (file+headline ,(expand-file-name "chinese.org" org-directory) "Words")
+           ,(concat "* [%(josh/chinese-prompt)] :drill:\n"
+                    "Added: %U\n"
+                    "Definition:\n"
+                    "%(josh/chinese-get-definition (josh/chinese-dict-find josh/chinese-word))\n"
+                    "** Characters\n"
+                    "%(josh/chinese-get-word josh/chinese-word-dict)\n"
+                    "** Pronunciation\n"
+                    "%(josh/chinese-get-pronunciation josh/chinese-word-dict)\n"))))
 #+end_src
 
 ** Configure org-refile
@@ -307,6 +459,18 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
         org-refile-allow-creating-parent-nodes 'confirm)
+#+end_src
+
+** Configure org-drill
+
+#+begin_src emacs-lisp
+  (use-package org-drill
+    :config (progn
+              (add-to-list 'org-modules 'org-drill)
+              (setq org-drill-add-random-noise-to-intervals-p t)
+              (setq org-drill-hint-separator "||")
+              (setq org-drill-learn-fraction 0.25)
+              (setq org-drill--lapse-very-overdue-entries-p t)))
 #+end_src
 
 * Configure =org-roam=
@@ -448,6 +612,7 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
 #+begin_src emacs-lisp
   (use-package typescript-mode)
+  (setq-default typescript-indent-level 2)
 
   (use-package lsp-mode
     :init
@@ -474,7 +639,12 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
   ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
   (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-  (use-package which-key :diminish which-key-mode :config (which-key-mode))
+  (use-package which-key
+    :diminish which-key-mode
+    :config
+    (which-key-mode))
+
+  (advice-add 'lsp-execute-code-action :after (lambda (r) (call-interactively 'lsp)))
 #+end_src
 
 *** Node version management with =nvm=
@@ -614,7 +784,11 @@ Recommended reading / viewing to demystify =eshell=:
           eshell-hist-ignoredups t ;; ???, but a lot of people have it
           eshell-save-history-on-exit t ;; Save history of eshell process on exist
           eshell-prefer-lisp-functions nil ;; Prefer external commands to Lisp functions
-          eshell-destroy-buffer-when-process-dies t)) ;; When eshell process exists, destroy buffer
+          eshell-destroy-buffer-when-process-dies t) ;; When eshell process exists, destroy buffer
+    (add-hook 'eshell-mode-hook
+            (lambda ()
+              (define-key eshell-mode-map (kbd "C-r") 'counsel-esh-history))))
+
 #+end_src
 
 ** Utility functions
@@ -645,7 +819,7 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
       (other-window 1)
       (eshell "new")))
 
-  (bind-key "C-!" 'eshell-here)
+  (global-set-key (kbd "C-!") 'eshell-here)
 #+end_src
 
 Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
@@ -664,7 +838,7 @@ Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 =eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
 
 #+begin_src emacs-lisp
-  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node"))
+  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node" "ssh"))
   (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh" "yarn" "npm" "docker" "docker-compose"))
 #+end_src
 
