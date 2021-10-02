@@ -578,15 +578,22 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
 =eshell= related interactive functions defined here.
 
 #+begin_src emacs-lisp
-  (defun eshell-here ()
-    "Opens up a new shell in the directory associated with the
-      current buffer's file. The eshell is renamed to match that
-      directory to make multiple eshell windows easier."
-    (interactive)
+  (defun eshell-here (arg)
+    "Opens a new eshell buffer in the lower quarter of the frame.
+  If called without \\[universal-argument], it opens the shell in the project root directory.
+  If called with \\[universal-argument], it opens the shell in the current buffer's directory.
+  The eshell is renamed to match the directory to make multiple eshell windows easier.
+  Projectile is a required to determine the project root."
+    (interactive "P")
     (let* ((height (/ (window-total-height) 4)))
       (split-window-vertically (- height))
       (other-window 1)
-      (eshell "new")))
+      (if (and (equal arg nil)
+               (fboundp 'projectile-project-root)
+               (projectile-project-root))
+          (let ((default-directory (projectile-project-root)))
+            (eshell "new"))
+        (eshell "new"))))
 
   (global-set-key (kbd "C-!") 'eshell-here)
 #+end_src
@@ -607,8 +614,8 @@ Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 =eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
 
 #+begin_src emacs-lisp
-  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node" "ssh"))
-  (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh" "yarn" "npm" "docker" "docker-compose"))
+  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node" "ssh" "yarn" "npm" "docker" "docker-compose"))
+  (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh"))
 #+end_src
 
 Related: set Unix Pager to be the =cat= command.
