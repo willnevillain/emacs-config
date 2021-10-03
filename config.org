@@ -591,9 +591,11 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
       (if (and (equal arg nil)
                (fboundp 'projectile-project-root)
                (projectile-project-root))
-          (let ((default-directory (projectile-project-root)))
+          (let ((default-directory (projectile-project-root))
+                (eshell-buffer-name (concat "*eshell <" (projectile-project-name) ">*")))
             (eshell "new"))
-        (eshell "new"))))
+        (let ((eshell-buffer-name (concat "*eshell <" (buffer-file-name) ">*")))
+          (eshell "new")))))
 
   (global-set-key (kbd "C-!") 'eshell-here)
 #+end_src
