@@ -7,14 +7,13 @@
 For this configuration to work correctly, the following dependencies must be installed on your system.
 
 - =ripgrep= for fast searching.
-- =graphviz= for =org-roam= graph.
-- =JetBrains Mono font=.
+- =Fira Code= font.
 
 * SSL config
 
 Allows for pulling from =https= package archives.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq tls-checktrust t)
   (setq gnutls-verify-error t)
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
@@ -22,7 +21,7 @@ Allows for pulling from =https= package archives.
 
 * Add package repositories
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (require 'package)
   (setq package-enable-at-startup nil)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -33,7 +32,7 @@ Allows for pulling from =https= package archives.
 
 Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.org#garbage-collection-tuning][abrochard config]].
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   ;; When idle for 30sec run the GC no matter what.
   (defvar k-gc-timer
     (run-with-idle-timer 30 t (lambda () (garbage-collect))))
@@ -53,7 +52,7 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
 
 [[https://github.com/myrjola/diminish.el][diminish]] hides minor-modes from the modeline. =use-package= has support for invoking =diminish= via the =:diminish= keyword.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (mapc
    (lambda (package)
      (unless (package-installed-p package)
@@ -68,7 +67,7 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
 =use-package-always-ensure= set to =t= is equivalent to all =use-package= declaractions having the =:ensure= keyword set to =t=.
 =:ensure= causes packages to be installed automatically if not already present on system.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (require 'use-package)
   (require 'diminish)
 
@@ -89,7 +88,7 @@ The main things I notably get from this are:
 
 Will maybe pull out these specific changes into dedicated config to avoid risk a new version of =better-defaults= changing some behavior I'm used to, but it should be fine.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package better-defaults)
 #+end_src
 
@@ -99,7 +98,7 @@ Will maybe pull out these specific changes into dedicated config to avoid risk a
 
 Inhibit startup message and have scratch buffer empty by default.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq initial-scratch-message nil)
   (setq inhibit-startup-message t)
 #+end_src
@@ -108,64 +107,57 @@ Inhibit startup message and have scratch buffer empty by default.
 
 Do not make an audible noise when attempting to do something invalid.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq ring-bell-function 'ignore)
 #+end_src
 
 Ask for confirmation before quitting - remove pain of accidental =C-x C-c= fat fingers.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq confirm-kill-emacs 'y-or-n-p)
 #+end_src
 
 Accept =y= and =n= in place of =yes= and =no= respectively.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (fset 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
 Auto-indent on =RET= in addition to usual =C-j=.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (define-key global-map (kbd "RET") 'newline-and-indent)
 #+end_src
 
 ** Theme
 
-=dracula= as the theme, but via the =doom-themes= package.
+The theme du jour will often change, but I tend to get them via [[https://github.com/hlissner/emacs-doom-themes][=emacs-doom-themes=]].
 
-#+begin_src emacs-lisp
-  ;; (use-package dracula-theme
-  ;;   :config
-  ;;   (setq dracula-enlarge-headings nil)) ;; Don't change heading/title font sizes
-
-  ;; (load-theme 'dracula t)
-
+#+begin_src emacs-lisp :results output silent
   (use-package doom-themes
-    :init (load-theme 'doom-dracula t))
+    :init (load-theme 'doom-zenburn t))
 #+end_src
-
-#+RESULTS:
 
 ** Font
 
-FiraCode as font.
+Fira Code as font.
 
-#+begin_src emacs-lisp
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height 128)
+#+begin_src emacs-lisp :results output silent
+  (defun willnevillain/set-default-font (font-height)
+    (interactive)
+    (progn
+      (set-face-attribute 'default nil :font "Fira Code Retina" :height font-height)
+      (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height font-height)
+      (set-face-attribute 'variable-pitch nil :font "Input Sans" :height font-height :weight 'regular)))
 
-  ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 128)
-
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Input Sans" :height 128 :weight 'regular)
+  (willnevillain/set-default-font 128)
 #+end_src
 
 ** Custom modeline
 
 Using =doom-modeline= because it's minimal yet excellent out of the box. With =all-the-icons= support!
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package all-the-icons)
 
   (use-package doom-modeline
@@ -177,7 +169,7 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
 
 ** Install =ivy=, rebind common functions, fuzzy match everywhere
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package counsel
     :bind (("C-s" . swiper)
            ("M-x" . counsel-M-x)
@@ -214,7 +206,7 @@ I use org-mode currently for daily task tracking and project management. I use =
 
 ** Core configuration
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package org
 
     :config
@@ -246,7 +238,7 @@ I use org-mode currently for daily task tracking and project management. I use =
 
 Likewise, agenda files will live in Dropbox.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq org-agenda-skip-scheduled-if-done t
         org-agenda-files `(,org-directory)
         org-agenda-custom-commands '(("p" tags "PROJECT" nil)
@@ -262,7 +254,7 @@ Likewise, agenda files will live in Dropbox.
 
 ** Configure todo keywords
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq org-todo-keywords
         '((sequence "TODO(t!)" "|" "DONE(d!)")))
 #+end_src
@@ -271,7 +263,7 @@ Likewise, agenda files will live in Dropbox.
 
 [[https://github.com/larstvei/ox-gfm][ox-gfm]] adds support for export org files to GitHub Flavored Markdown.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package ox-gfm)
 #+end_src
 
@@ -281,7 +273,7 @@ Likewise, agenda files will live in Dropbox.
 
 We define the languages that we want =org-babel= to execute.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
 #+end_src
 
@@ -289,7 +281,7 @@ We define the languages that we want =org-babel= to execute.
 
 This configuration is mainly to allow refiling subtrees to the root of a new file - see [[https://blog.aaronbieber.com/2017/03/19/organizing-notes-with-refile.html][this blog post for details]].
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq org-refile-targets '((org-agenda-files :maxlevel . 3))
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
@@ -303,7 +295,7 @@ It provides features and functions that operate on the project level, such as ju
 
 ** Install =projectile= and core configuration
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package projectile
     :diminish projectile-mode
     :config
@@ -318,14 +310,14 @@ It provides features and functions that operate on the project level, such as ju
 
 [[https://github.com/magit/magit][magit]] is a Git porcelain for Emacs, and honestly one of the killer apps of Emacs.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package magit
     :bind ("C-x g" . magit-status))
 #+end_src
 
 [[https://github.com/alphapapa/magit-todos][magit-todos]] for visualizing =TODO= items marked across the source.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package magit-todos
     :diminish magit-todos-mode
     :config (magit-todos-mode t))
@@ -339,7 +331,7 @@ Anything related to a specific programming language, or programming major mode a
 
 [[https://github.com/flycheck/flycheck][flycheck]] provides on the fly syntax checking; it supports [[https://www.flycheck.org/en/latest/languages.html][many languages and checkers]].
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package flycheck
     :config
     (global-flycheck-mode))
@@ -349,7 +341,7 @@ Anything related to a specific programming language, or programming major mode a
 
 [[https://company-mode.github.io/][company]] is an in-buffer text completion framework; put more simply, when you're typing something, company will create a dropdown of possible options for what you're typing.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package company
     :diminish company-mode
     :config
@@ -362,7 +354,7 @@ Anything related to a specific programming language, or programming major mode a
 
 [[https://github.com/company-mode/company-quickhelp][company-quickhelp]] displays a pop-up when idling on a company candidate with documentation on the candidate.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package company-quickhelp
     :config
     (setq company-quickhelp-delay 0.5)
@@ -379,7 +371,7 @@ Configuration assumes that you have =eslint= and =prettier= installed for projec
 
 Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package typescript-mode)
   (setq-default typescript-indent-level 2)
 
@@ -420,7 +412,7 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
 Load correct nvm version based off of =.nvmrc=.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package nvm
     :hook (typescript-mode . nvm-use-for))
 #+end_src
@@ -431,7 +423,7 @@ Load correct nvm version based off of =.nvmrc=.
 
 This allows using project based installations of tools like =eslint= and =prettier=, which is my preference for controlling versions.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package add-node-modules-path
     :hook (typescript-mode . add-node-modules-path)
     :hook (json-mode . add-node-modules-path)
@@ -444,7 +436,7 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 =tide= offers formatting support that aligns with TypeScript standards, but I work with a few codebases that prefer local =prettier= configs.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package prettier-js
     :hook (typescript-mode . prettier-js-mode)
     :hook (json-mode . prettier-js-mode)
@@ -455,7 +447,7 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 Debugger - I don't know how to use this yet.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package indium)
 #+end_src
 
@@ -466,7 +458,7 @@ Debugger - I don't know how to use this yet.
 
 [[https://github.com/yoshiki/yaml-mode][yaml-mode]] provides YAML file editing support.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package yaml-mode)
 #+end_src
 
@@ -474,7 +466,7 @@ Debugger - I don't know how to use this yet.
 
 [[https://github.com/jrblevin/markdown-mode][markdown-mode]] provides Markdown editing support.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package markdown-mode
     :mode (("README\\.md\\'" . gfm-mode)
            ("\\.md\\'" . markdown-mode)))
@@ -484,7 +476,7 @@ Debugger - I don't know how to use this yet.
 
 [[https://github.com/joshwnj/json-mode][json-mode]] provides JSON file editing support.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package json-mode
     :hook (json-mode . (lambda ()
               (make-local-variable 'js-indent-level)
@@ -496,7 +488,7 @@ Debugger - I don't know how to use this yet.
 [[https://github.com/spotify/dockerfile-mode][dockerfile-mode]] provides Dockerfile editing support (and image building as well).
 Somewhat of a surprise to me, this is maintained by Spotify.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package dockerfile-mode)
 #+end_src
 
@@ -506,7 +498,7 @@ Somewhat of a surprise to me, this is maintained by Spotify.
 
 [[https://github.com/emacsorphanage/git-gutter][git-gutter]] provides visual indicators in the left gutter of a buffer of git changes.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package git-gutter
     :diminish git-gutter-mode
     :config (global-git-gutter-mode 1))
@@ -522,13 +514,13 @@ Anything related to connecting to, declaring configuration for or otherwise mana
 
 The [[https://github.com/abrochard][author]] gave an interesting talk about how the extension was born and built, which I encourage you to watch [[https://www.youtube.com/watch?v=w3krYEeqnyk][here]].
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package kubel)
 #+end_src
 
 * Configure =restclient-mode=
 
-#+begin_src emacs-lisp :output silent
+#+begin_src emacs-lisp :results output silent
   (use-package restclient
     :mode (("\\.http\\'" . restclient-mode)))
 #+end_src
@@ -545,7 +537,7 @@ Recommended reading / viewing to demystify =eshell=:
 
 ** Package configuration
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package eshell
     :config
     (setq eshell-scroll-to-bottom-on-input 'all ;; Scroll to bottom of buffer when entering input
@@ -564,7 +556,7 @@ Recommended reading / viewing to demystify =eshell=:
 
 Defined functions prefaced with =eshell/= should be invokable using everything after the =/= in eshell. 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (defun eshell/clear ()
     "Clear eshell buffer."
     (let ((inhibit-read-only t))
@@ -577,7 +569,7 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
 
 =eshell= related interactive functions defined here.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (defun eshell-here (arg)
     "Opens a new eshell buffer in the lower quarter of the frame.
   If called without \\[universal-argument], it opens the shell in the project root directory.
@@ -602,7 +594,7 @@ Defined functions prefaced with =eshell/= should be invokable using everything a
 
 Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (defun eshell-pop--kill-and-delete-window ()
     "Used on eshell exit hook, will delete the window if not the only one in the frame"
     (unless (one-window-p)
@@ -615,14 +607,14 @@ Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 
 =eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node" "ssh" "yarn" "npm" "docker" "docker-compose"))
   (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh"))
 #+end_src
 
 Related: set Unix Pager to be the =cat= command.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setenv "PAGER" "cat")
 #+end_src
 
@@ -634,7 +626,7 @@ Snippets from the [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippe
 
 My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs.d/yasnippet-snippets=.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package yasnippet
     :diminish yas-minor-mode
     :config
@@ -648,7 +640,7 @@ My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs
 
 [[https://github.com/masasam/emacs-easy-hugo][easy-hugo]] is a package that makes it easier to work with the [[https://gohugo.io/][hugo]] static site generator.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package easy-hugo
     :init
     (setq easy-hugo-basedir "~/code/blog/")
@@ -663,7 +655,7 @@ Any utility functions that are used at a global level go here.
 
 ** Jump to this configuration file
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (defun willnevillain/goto-configuration ()
     "Go to org configuration file."
     (interactive)
@@ -676,17 +668,19 @@ Any utility functions that are used at a global level go here.
 
 This function is pretty wild and probably horrible but it works - used for toggling font size when doing coding streams.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (defun willnevillain/toggle-stream-fontsize ()
     "Toggle the font size between default and large for streaming"
     (interactive)
-     (if (string= (cdar default-frame-alist) "JetBrains Mono-24")
-         (progn
-           (setcar default-frame-alist '(font . "JetBrains Mono-14"))
-           (set-face-attribute 'default nil :font "JetBrains Mono-14"))
-       (progn
-         (setcar default-frame-alist '(font . "JetBrains Mono-24"))
-         (set-face-attribute 'default nil :font "JetBrains Mono-24"))))
+    (if (equal (boundp 'willnevillain/toggle-stream-fontsize--embiggened) nil)
+        (setq willnevillain/toggle-stream-fontsize--embiggened nil))
+    (if willnevillain/toggle-stream-fontsize--embiggened
+        (progn
+          (willnevillain/set-default-font 128)
+          (setq willnevillain/toggle-stream-fontsize--embiggened nil))
+      (progn
+        (willnevillain/set-default-font 256)
+        (setq willnevillain/toggle-stream-fontsize--embiggened t))))
 #+end_src
 
 * Miscellaney
@@ -699,7 +693,7 @@ Configuration that doesn't really fit elsewhere or deserve a top level heading g
 
 We rebind all the command help keybinds to their =helpful= equivalent.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (use-package helpful
     :bind (("C-h f" . helpful-callable)
            ("C-h v" . helpful-variable)
@@ -714,7 +708,7 @@ We rebind all the command help keybinds to their =helpful= equivalent.
 
 On OS X in particular, Emacs launched as a GUI does not inherit all the shell env vars.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq exec-path-from-shell-arguments nil) ;; Suppress default arg to open interactive shell
 
   (use-package exec-path-from-shell
@@ -727,7 +721,7 @@ On OS X in particular, Emacs launched as a GUI does not inherit all the shell en
 
 I dislike polluting the file tree with Emacs backups - I put them all in =~/.emacs.d/backups=.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 #+end_src
 
@@ -737,7 +731,7 @@ I dislike polluting the file tree with Emacs backups - I put them all in =~/.ema
 
 I only want global spell checking in =org-mode= buffers, and for programming mode buffers enable =flyspell-prog-mode= which only spell checks comments and strings.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (add-hook 'org-mode-hook 'flyspell-mode)
 #+end_src
 
@@ -745,7 +739,7 @@ I only want global spell checking in =org-mode= buffers, and for programming mod
 
 There are a few minor modes not specifically configured in this file that I like to diminish.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (diminish 'abbrev-mode)
   (diminish 'auto-revert-mode)
   (diminish 'eldoc-mode)
@@ -758,7 +752,7 @@ By default, Emacs places anything customized via =customize= at the bottom of =i
 
 Prefer to place all this cruft in a specific file.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results output silent
   (setq custom-file
         (expand-file-name "custom.el" user-emacs-directory))
   (load custom-file)
