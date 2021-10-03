@@ -103,6 +103,25 @@ Inhibit startup message and have scratch buffer empty by default.
   (setq inhibit-startup-message t)
 #+end_src
 
+** Emacs Dashboard
+
+#+begin_src emacs-lisp :results output silent
+  (use-package dashboard
+    :config
+    (progn
+      (dashboard-setup-startup-hook)
+      (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
+            dashboard-startup-banner "/Users/will/Dropbox/media/pics/emacs-dashboard-mimikyu.png"
+            dashboard-center-content t
+            dashboard-items '((recents . 10)
+                              (projects . 10)
+                              (agenda . 10))
+            dashboard-set-heading-icons t
+            dashboard-set-file-icons t
+            dashboard-set-footer nil
+            dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)))
+#+end_src
+
 ** General UI / UX tweaks
 
 Do not make an audible noise when attempting to do something invalid.
