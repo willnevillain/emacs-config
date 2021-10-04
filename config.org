@@ -74,6 +74,12 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
   (setq use-package-always-ensure t)
 #+end_src
 
+* Start Emacs server
+
+#+begin_src emacs-lisp :results output silent
+  (server-start)
+#+end_src
+
 * Install =better-defaults=
 
 [[https://git.sr.ht/~technomancy/better-defaults][better-defaults]] provides a set of packages and configuration updates to add "better" defaults.
@@ -113,8 +119,7 @@ Inhibit startup message and have scratch buffer empty by default.
       (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
             dashboard-startup-banner "/Users/will/Dropbox/media/pics/emacs-dashboard-mimikyu.png"
             dashboard-center-content t
-            dashboard-items '((recents . 10)
-                              (projects . 10)
+            dashboard-items '((projects . 10)
                               (agenda . 10))
             dashboard-set-heading-icons t
             dashboard-set-file-icons t
@@ -653,6 +658,16 @@ My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs
     (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
     (yas-global-mode)
     (global-set-key (kbd "M-/") 'company-yasnippet))
+#+end_src
+
+* Configure =emacs-everywhere=
+
+See [[https://emacstil.com/til/2021/10/04/edit-text-everywhere-with-emacs/][this blog post]] for instructions on configuring the OS X shortcut.
+
+Requires the Emacs server to be running (with =(server-start)= in this file).
+
+#+begin_src emacs-lisp :results output silent
+  (use-package emacs-everywhere)
 #+end_src
 
 * Configure blogging tool(s)
