@@ -398,6 +398,8 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 #+begin_src emacs-lisp :results output silent
   (use-package typescript-mode)
   (setq-default typescript-indent-level 2)
+  (setq-default js-indent-level 2)
+
 
   (use-package lsp-mode
     :init
@@ -405,14 +407,16 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
     :hook
     (typescript-mode . lsp)
+    (typescript-mode . (lambda ()
+                         (add-hook 'before-save-hook #'lsp-eslint-apply-all-fixes t t)))
     (javascript-mode . lsp)
     (lsp-mode . lsp-enable-which-key-integration)
 
     :config
-    (setq lsp-enable-on-type-formatting nil)
-    (setq lsp-eslint-validate [javascript typescript])
+    (add-to-list 'lsp-disabled-clients '(prisma-mode . eslint))
+    (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.25/server/out/eslintServer.js" "--stdio"))
+    (setq lsp-eslint-validate '(javascript typescript))
     (setq lsp-eslint-package-manager "yarn")
-    (setq lsp-eslint-format nil)
     (setq lsp-eslint-trace-server t)
     (setq lsp-log-io t)
 
@@ -465,6 +469,20 @@ This allows using project based installations of tools like =eslint= and =pretti
     :hook (typescript-mode . prettier-js-mode)
     :hook (json-mode . prettier-js-mode)
     :hook (yaml-mode . prettier-js-mode))
+#+end_src
+
+*** =prisma-mode=
+
+#+begin_src emacs-lisp :results output silent
+  (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
+  (require 'prisma-mode)
+  (require 'lsp-prisma)
+
+  (defun willnevillain/lsp-format-buffer-on-save ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t))
+
+  (add-hook 'prisma-mode-hook #'lsp)
+  (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
 #+end_src
 
 *** Indium
@@ -632,7 +650,7 @@ Miscellaneous non-interactive and non-=eshell/= utility functions defined below.
 =eshell= is not a fully functioning terminal, and cannot handle certain visual commands.
 
 #+begin_src emacs-lisp :results output silent
-  (setq eshell-visual-command '("htop" "top" "less" "more" "screen" "node" "ssh" "yarn" "npm" "docker" "docker-compose"))
+  (setq eshell-visual-commands '("htop" "top" "less" "more" "screen" "vi" "vim"))
   (setq eshell-visual-subcommands '("git" "log" "diff" "show" "ssh"))
 #+end_src
 
