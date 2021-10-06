@@ -159,7 +159,7 @@ The theme du jour will often change, but I tend to get them via [[https://github
 
 #+begin_src emacs-lisp :results output silent
   (use-package doom-themes
-    :init (load-theme 'doom-zenburn t))
+    :init (load-theme 'doom-tomorrow-night t))
 #+end_src
 
 ** Font
