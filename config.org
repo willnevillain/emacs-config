@@ -74,6 +74,20 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
   (setq use-package-always-ensure t)
 #+end_src
 
+
+* Configure =exec-path-from-shell= (OS X)
+
+[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]] copies specified environment variables from your shell to Emacs.
+
+On OS X in particular, Emacs launched as a GUI does not inherit all the shell env vars.
+
+#+begin_src emacs-lisp :results output silent
+  (setq exec-path-from-shell-arguments nil) ;; Suppress default arg to open interactive shell
+
+  (use-package exec-path-from-shell
+    :config (exec-path-from-shell-initialize))
+#+end_src
+
 * Start Emacs server
 
 #+begin_src emacs-lisp :results output silent
@@ -758,21 +772,6 @@ We rebind all the command help keybinds to their =helpful= equivalent.
            ("C-h F" . helpful-function)
            ("C-h C" . helpful-command)))
 #+end_src
-
-** Configure =exec-path-from-shell= (OS X)
-
-[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]] copies specified environment variables from your shell to Emacs.
-
-On OS X in particular, Emacs launched as a GUI does not inherit all the shell env vars.
-
-#+begin_src emacs-lisp :results output silent
-  (setq exec-path-from-shell-arguments nil) ;; Suppress default arg to open interactive shell
-
-  (use-package exec-path-from-shell
-    :config
-    (when (memq window-system '(mac ns x))
-      (exec-path-from-shell-initialize)))
-#+end_src 
 
 ** Configure backups to go into one folder
 
