@@ -185,8 +185,8 @@ Fira Code as font.
     (interactive)
     (progn
       (set-face-attribute 'default nil :font "Fira Code Retina" :height font-height)
-      (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height font-height)
-      (set-face-attribute 'variable-pitch nil :font "Input Sans" :height font-height :weight 'regular)))
+      (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height font-height)))
+      ;; (set-face-attribute 'variable-pitch nil :font "Input Sans" :height font-height :weight 'regular)))
 
   (willnevillain/set-default-font 128)
 #+end_src
@@ -324,6 +324,12 @@ This configuration is mainly to allow refiling subtrees to the root of a new fil
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
         org-refile-allow-creating-parent-nodes 'confirm)
+#+end_src
+
+** Configure =org-tree-slide=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package org-tree-slide)
 #+end_src
 
 * Configure =projectile=
