@@ -409,12 +409,14 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
     (typescript-mode . lsp)
     (typescript-mode . (lambda ()
                          (add-hook 'before-save-hook #'lsp-eslint-apply-all-fixes t t)))
-    (javascript-mode . lsp)
+    (js-mode . lsp)
+    (js-mode . (lambda ()
+                         (add-hook 'before-save-hook #'lsp-eslint-apply-all-fixes t t)))
     (lsp-mode . lsp-enable-which-key-integration)
 
     :config
-    (add-to-list 'lsp-disabled-clients '(prisma-mode . eslint))
-    (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.25/server/out/eslintServer.js" "--stdio"))
+    ;; (add-to-list 'lsp-disabled-clients '(prisma-mode . eslint)) FIXME(prisma-mode)
+    (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.10/server/out/eslintServer.js" "--stdio"))
     (setq lsp-eslint-validate '(javascript typescript))
     (setq lsp-eslint-package-manager "yarn")
     (setq lsp-eslint-trace-server t)
@@ -454,6 +456,7 @@ This allows using project based installations of tools like =eslint= and =pretti
 #+begin_src emacs-lisp :results output silent
   (use-package add-node-modules-path
     :hook (typescript-mode . add-node-modules-path)
+    :hook (js-mode . add-node-modules-path)
     :hook (json-mode . add-node-modules-path)
     :hook (yaml-mode . add-node-modules-path))
 #+end_src
@@ -466,23 +469,25 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 #+begin_src emacs-lisp :results output silent
   (use-package prettier-js
-    :hook (typescript-mode . prettier-js-mode)
     :hook (json-mode . prettier-js-mode)
-    :hook (yaml-mode . prettier-js-mode))
+    :hook (yaml-mode . prettier-js-mode)
+    :hook (typescript-mode . prettier-js-mode)
+    :hook (js-mode . prettier-js-mode))
 #+end_src
 
-*** =prisma-mode=
+*** TODO =prisma-mode= - FIXME
 
+- State "TODO"       from              [2021-12-13 Mon 11:00]
 #+begin_src emacs-lisp :results output silent
-  (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
-  (require 'prisma-mode)
-  (require 'lsp-prisma)
+  ;; (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
+  ;; (require 'prisma-mode)
+  ;; (require 'lsp-prisma)
 
-  (defun willnevillain/lsp-format-buffer-on-save ()
-    (add-hook 'before-save-hook #'lsp-format-buffer t t))
+  ;; (defun willnevillain/lsp-format-buffer-on-save ()
+  ;;   (add-hook 'before-save-hook #'lsp-format-buffer t t))
 
-  (add-hook 'prisma-mode-hook #'lsp)
-  (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
+  ;; (add-hook 'prisma-mode-hook #'lsp)
+  ;; (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
 #+end_src
 
 *** Indium
