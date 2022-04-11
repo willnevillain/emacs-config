@@ -232,6 +232,11 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
     :config
     (counsel-projectile-mode t)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
+  (use-package ivy-xref
+    :config
+    (setq xref-show-definitions-function #'ivy-xref-show-defs)
+    (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 #+end_src
 
 * Configure =org-mode=
@@ -583,6 +588,14 @@ The [[https://github.com/abrochard][author]] gave an interesting talk about how 
 
 #+begin_src emacs-lisp :results output silent
   (use-package kubel)
+#+end_src
+
+** Configure =k8s-mode=
+
+[[https://github.com/TxGVNN/emacs-k8s-mode][k8s-mode]] is a major mode for editing K8s YAML files.
+
+#+begin_src emacs-lisp :results output silent
+  (use-package k8s-mode)
 #+end_src
 
 * Configure =restclient-mode=
