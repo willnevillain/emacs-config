@@ -237,6 +237,8 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
     :config
     (setq xref-show-definitions-function #'ivy-xref-show-defs)
     (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+
+  (use-package wgrep)
 #+end_src
 
 * Configure =org-mode=
@@ -441,10 +443,10 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
 
     :config
     ;; (add-to-list 'lsp-disabled-clients '(prisma-mode . eslint)) FIXME(prisma-mode)
-    (setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.10/server/out/eslintServer.js" "--stdio"))
-    (setq lsp-eslint-validate '(javascript typescript))
-    (setq lsp-eslint-package-manager "yarn")
-    (setq lsp-eslint-trace-server t)
+    ;;(setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.10/server/out/eslintServer.js" "--stdio"))
+    ;;(setq lsp-eslint-validate '(javascript typescript))
+    ;;(setq lsp-eslint-package-manager "yarn")
+    ;;(setq lsp-eslint-trace-server t)
     (setq lsp-log-io t)
 
     :commands lsp)
@@ -502,17 +504,16 @@ This allows using project based installations of tools like =eslint= and =pretti
 
 *** TODO =prisma-mode= - FIXME
 
-- State "TODO"       from              [2021-12-13 Mon 11:00]
 #+begin_src emacs-lisp :results output silent
-  ;; (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
-  ;; (require 'prisma-mode)
-  ;; (require 'lsp-prisma)
+  (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
+  (require 'prisma-mode)
+  (require 'lsp-prisma)
 
-  ;; (defun willnevillain/lsp-format-buffer-on-save ()
-  ;;   (add-hook 'before-save-hook #'lsp-format-buffer t t))
+  (defun willnevillain/lsp-format-buffer-on-save ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t))
 
-  ;; (add-hook 'prisma-mode-hook #'lsp)
-  ;; (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
+  (add-hook 'prisma-mode-hook #'lsp)
+  (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
 #+end_src
 
 *** Indium
@@ -769,7 +770,7 @@ This function is pretty wild and probably horrible but it works - used for toggl
           (willnevillain/set-default-font 128)
           (setq willnevillain/toggle-stream-fontsize--embiggened nil))
       (progn
-        (willnevillain/set-default-font 256)
+        (willnevillain/set-default-font 164)
         (setq willnevillain/toggle-stream-fontsize--embiggened t))))
 #+end_src
 
