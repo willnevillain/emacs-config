@@ -6,6 +6,8 @@ auto-save-list/
 backups/
 places
 projectile-bookmarks.eld
+projectile.cache
+history/
 *.bak
 eshell/
 *.dat
