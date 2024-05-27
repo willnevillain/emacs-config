@@ -7,7 +7,7 @@ backups/
 places
 projectile-bookmarks.eld
 projectile.cache
-history/
+history
 *.bak
 eshell/
 *.dat
