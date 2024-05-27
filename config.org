@@ -7,7 +7,7 @@
 For this configuration to work correctly, the following dependencies must be installed on your system.
 
 - =ripgrep= for fast searching.
-- =Fira Code= font.
+- =Fira Code Nerd Font= font.
 
 * SSL config
 
@@ -88,11 +88,6 @@ On OS X in particular, Emacs launched as a GUI does not inherit all the shell en
     :config (exec-path-from-shell-initialize))
 #+end_src
 
-* Start Emacs server
-
-#+begin_src emacs-lisp :results output silent
-  (server-start)
-#+end_src
 
 * Install =better-defaults=
 
@@ -126,19 +121,19 @@ Inhibit startup message and have scratch buffer empty by default.
 ** Emacs Dashboard
 
 #+begin_src emacs-lisp :results output silent
-  (use-package dashboard
-    :config
-    (progn
-      (dashboard-setup-startup-hook)
-      (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
-            dashboard-startup-banner "/Users/will/Dropbox/media/pics/emacs-dashboard-mimikyu.png"
-            dashboard-center-content t
-            dashboard-items '((projects . 10)
-                              (agenda . 10))
-            dashboard-set-heading-icons t
-            dashboard-set-file-icons t
-            dashboard-set-footer nil
-            dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)))
+    (use-package dashboard
+      :config
+      (progn
+        (dashboard-setup-startup-hook)
+        (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
+              dashboard-startup-banner "/Users/will/Dropbox/media/pics/emacs-dashboard-mimikyu.png"
+              dashboard-center-content t
+              dashboard-projects-backend 'projectile
+              dashboard-items '((projects . 10))
+              dashboard-set-heading-icons t
+              dashboard-set-file-icons t
+              dashboard-set-footer nil
+              dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)))
 #+end_src
 
 ** General UI / UX tweaks
@@ -184,9 +179,8 @@ Fira Code as font.
   (defun willnevillain/set-default-font (font-height)
     (interactive)
     (progn
-      (set-face-attribute 'default nil :font "Fira Code Retina" :height font-height)
-      (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height font-height)))
-      ;; (set-face-attribute 'variable-pitch nil :font "Input Sans" :height font-height :weight 'regular)))
+      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height font-height)
+      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height font-height)))
 
   (willnevillain/set-default-font 128)
 #+end_src
@@ -197,6 +191,8 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
 
 #+begin_src emacs-lisp :results output silent
   (use-package all-the-icons)
+  ;; RUN THIS FIRST TIME (all-the-icons-install-fonts)
+  ;; RUN THIS FIRST TIME (nerd-icons-install-fonts)
 
   (use-package doom-modeline
     :init (doom-modeline-mode 1)
@@ -209,6 +205,9 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
 
 #+begin_src emacs-lisp :results output silent
   (use-package counsel
+    :config
+    (setq-default counsel-rg-base-command
+                  '("rg" "--max-columns" "240" "--with-filename" "--no-heading" "--line-number" "--color" "never" "--hidden" "%s"))
     :bind (("C-s" . swiper)
            ("M-x" . counsel-M-x)
            ("M-y" . counsel-yank-pop)
@@ -224,6 +223,7 @@ Using =doom-modeline= because it's minimal yet excellent out of the box. With =a
     (setq ivy-use-virtual-buffers t
           ivy-height 15
           ivy-count-format "(%d/%d) "
+          ivy-use-selectable-prompt t
           ivy-re-builders-alist '((read-file-name-internal . ivy--regex-fuzzy)
                                   (t . ivy--regex-plus))))
 
@@ -322,23 +322,6 @@ We define the languages that we want =org-babel= to execute.
   (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
 #+end_src
 
-** Configure org-refile
-
-This configuration is mainly to allow refiling subtrees to the root of a new file - see [[https://blog.aaronbieber.com/2017/03/19/organizing-notes-with-refile.html][this blog post for details]].
-
-#+begin_src emacs-lisp :results output silent
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 3))
-        org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps nil
-        org-refile-allow-creating-parent-nodes 'confirm)
-#+end_src
-
-** Configure =org-tree-slide=
-
-#+begin_src emacs-lisp :results output silent
-  (use-package org-tree-slide)
-#+end_src
-
 * Configure =projectile=
 
 [[https://github.com/bbatsov/projectile][projectile]] is a very powerful library for interacting with multiple projects.
@@ -351,10 +334,9 @@ It provides features and functions that operate on the project level, such as ju
     :diminish projectile-mode
     :config
     (projectile-mode)
-    (setq projectile-project-search-path '("~/code")) ;; Specify dir(s) to search for projects
+    (setq projectile-project-search-path '("~/code/digits")) ;; Specify dir(s) to search for projects
     (projectile-discover-projects-in-search-path) ;; Trigger project discovery
-    (setq projectile-enable-caching t) ;; Cache search results
-    (add-to-list 'projectile-globally-ignored-directories "node_modules")) ;; Never search in
+    (setq projectile-enable-caching t)) ;; Cache search results
 #+end_src
 
 * Configure =magit=
@@ -408,54 +390,30 @@ Anything related to a specific programming language, or programming major mode a
 #+begin_src emacs-lisp :results output silent
   (use-package company-quickhelp
     :config
-    (setq company-quickhelp-delay 0.5)
+    (setq company-quickhelp-delay 0.4)
     (company-quickhelp-mode))
 #+end_src
 
-** Configure support for TypeScript + ecosystem
-
-Currently I only do Backend Node.js TypeScript programming - as a result there is slim support for anything pertaining to the web or vanilla JS at this time.
-
-Configuration assumes that you have =eslint= and =prettier= installed for projects, either globally or project locally should be fine.
+** LSP
 
 *** Install and configure =lsp-mode=
 
-Using =lsp-mode= for TypeScript - this is in flux at the moment.
-
 #+begin_src emacs-lisp :results output silent
-  (use-package typescript-mode)
-  (setq-default typescript-indent-level 2)
-  (setq-default js-indent-level 2)
-
-
   (use-package lsp-mode
     :init
     (setq lsp-keymap-prefix "C-c l")
 
     :hook
-    (typescript-mode . lsp)
-    (typescript-mode . (lambda ()
-                         (add-hook 'before-save-hook #'lsp-eslint-apply-all-fixes t t)))
-    (js-mode . lsp)
-    (js-mode . (lambda ()
-                         (add-hook 'before-save-hook #'lsp-eslint-apply-all-fixes t t)))
     (lsp-mode . lsp-enable-which-key-integration)
 
     :config
-    ;; (add-to-list 'lsp-disabled-clients '(prisma-mode . eslint)) FIXME(prisma-mode)
-    ;;(setq lsp-eslint-server-command '("node" "/Users/will/apps/vscode-eslint-release-2.1.10/server/out/eslintServer.js" "--stdio"))
-    ;;(setq lsp-eslint-validate '(javascript typescript))
-    ;;(setq lsp-eslint-package-manager "yarn")
-    ;;(setq lsp-eslint-trace-server t)
-    (setq lsp-log-io t)
+    (setq lsp-file-watch-threshold 1500)
 
     :commands lsp)
 
   (use-package lsp-ui
-    :config (setq lsp-ui-sideline-show-code-actions nil)
     :commands lsp-ui-mode)
 
-  ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
   (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
   (use-package which-key
     :diminish which-key-mode
@@ -465,65 +423,21 @@ Using =lsp-mode= for TypeScript - this is in flux at the moment.
   (advice-add 'lsp-execute-code-action :after (lambda (r) (call-interactively 'lsp)))
 #+end_src
 
-*** Node version management with =nvm=
-
-Load correct nvm version based off of =.nvmrc=.
+** Configure =go-mode=
 
 #+begin_src emacs-lisp :results output silent
-  (use-package nvm
-    :hook (typescript-mode . nvm-use-for))
+  (use-package go-mode)
+  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+
+  (add-hook 'go-mode-hook #'lsp-deferred)
+
+  ;; Set up before-save hooks to format buffer and add/delete imports.
+  ;; Make sure you don't have other gofmt/goimports hooks enabled.
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 #+end_src
-
-*** Add node_modules =.bin= folder to =exec-path=
-
-[[https://github.com/codesuki/add-node-modules-path][add-node-modules-path]] provides a function that searches current file parent directories for a =node_modules/.bin/= folder.
-
-This allows using project based installations of tools like =eslint= and =prettier=, which is my preference for controlling versions.
-
-#+begin_src emacs-lisp :results output silent
-  (use-package add-node-modules-path
-    :hook (typescript-mode . add-node-modules-path)
-    :hook (js-mode . add-node-modules-path)
-    :hook (json-mode . add-node-modules-path)
-    :hook (yaml-mode . add-node-modules-path))
-#+end_src
-
-*** Install and configure =prettier-js=
-
-[[https://github.com/prettier/prettier-emacs][prettier-js]] provides formatting support via the [[https://prettier.io/][prettier]] code formatter.
-
-=tide= offers formatting support that aligns with TypeScript standards, but I work with a few codebases that prefer local =prettier= configs.
-
-#+begin_src emacs-lisp :results output silent
-  (use-package prettier-js
-    :hook (json-mode . prettier-js-mode)
-    :hook (yaml-mode . prettier-js-mode)
-    :hook (typescript-mode . prettier-js-mode)
-    :hook (js-mode . prettier-js-mode))
-#+end_src
-
-*** TODO =prisma-mode= - FIXME
-
-#+begin_src emacs-lisp :results output silent
-  (add-to-list 'load-path "/Users/will/code/non-elpa-emacs-packages/emacs-prisma-mode")
-  (require 'prisma-mode)
-  (require 'lsp-prisma)
-
-  (defun willnevillain/lsp-format-buffer-on-save ()
-    (add-hook 'before-save-hook #'lsp-format-buffer t t))
-
-  (add-hook 'prisma-mode-hook #'lsp)
-  (add-hook 'prisma-mode-hook #'willnevillain/lsp-format-buffer-on-save)
-#+end_src
-
-*** Indium
-
-Debugger - I don't know how to use this yet.
-
-#+begin_src emacs-lisp :results output silent
-  (use-package indium)
-#+end_src
-
 
 ** Configure development adjacent major modes
 
@@ -717,16 +631,6 @@ My snippets are located at =~/.emacs.d/snippets=, community library at =~/.emacs
     (global-set-key (kbd "M-/") 'company-yasnippet))
 #+end_src
 
-* Configure =emacs-everywhere=
-
-See [[https://emacstil.com/til/2021/10/04/edit-text-everywhere-with-emacs/][this blog post]] for instructions on configuring the OS X shortcut.
-
-Requires the Emacs server to be running (with =(server-start)= in this file).
-
-#+begin_src emacs-lisp :results output silent
-  (use-package emacs-everywhere)
-#+end_src
-
 * Configure blogging tool(s)
 
 [[https://github.com/masasam/emacs-easy-hugo][easy-hugo]] is a package that makes it easier to work with the [[https://gohugo.io/][hugo]] static site generator.
@@ -770,8 +674,19 @@ This function is pretty wild and probably horrible but it works - used for toggl
           (willnevillain/set-default-font 128)
           (setq willnevillain/toggle-stream-fontsize--embiggened nil))
       (progn
-        (willnevillain/set-default-font 164)
+        (willnevillain/set-default-font 200)
         (setq willnevillain/toggle-stream-fontsize--embiggened t))))
+#+end_src
+
+** Get keys of hash table sorted alphabetically
+
+#+begin_src emacs-lisp :results output silent
+  (defun willnevillain/sorted-hash-table-keys (hash-table)
+    (let ((keys ()))
+      (maphash (lambda (k v) (push k keys)) hash-table)
+      (sort keys
+            (lambda (k1 k2)
+              (string-lessp k1 k2)))))
 #+end_src
 
 * Miscellaney
@@ -822,6 +737,12 @@ There are a few minor modes not specifically configured in this file that I like
   (diminish 'flyspell-mode)
 #+end_src
 
+** Configure =csv-mode=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package csv-mode)
+#+end_src
+
 * Configure and load custom file
 
 By default, Emacs places anything customized via =customize= at the bottom of =init.el=.
@@ -831,6 +752,5 @@ Prefer to place all this cruft in a specific file.
 #+begin_src emacs-lisp :results output silent
   (setq custom-file
         (expand-file-name "custom.el" user-emacs-directory))
-  (load custom-file)
+  (if (file-exists-p custom-file) (load custom-file))
 #+end_src
-

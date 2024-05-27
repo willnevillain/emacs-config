@@ -4,6 +4,10 @@ elpa/
 url/
 auto-save-list/
 backups/
-configuration.el
 places
 projectile-bookmarks.eld
+*.bak
+eshell/
+*.dat
+custom.el
+config.el
