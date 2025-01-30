@@ -7,7 +7,7 @@
 For this configuration to work correctly, the following dependencies must be installed on your system.
 
 - =ripgrep= for fast searching.
-- =Fira Code Nerd Font= font.
+- =FiraCode Nerd Font= font.
 
 * SSL config
 
@@ -62,6 +62,22 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
    '(use-package diminish))
 #+end_src
 
+** Install =quelpa=
+
+[[https://github.com/quelpa/quelpa][quelpa]] and [[https://github.com/quelpa/quelpa-use-package][quelpa-use-package]] allow installing packages from their source repositories if they are not available in an Emacs package registry
+
+#+begin_src emacs-lisp :results output silent
+  (unless (package-installed-p 'quelpa)
+    (with-temp-buffer
+      (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+      (eval-buffer)
+      (quelpa-self-upgrade)
+      (quelpa
+       '(quelpa-use-package
+         :fetcher git
+         :url "https://github.com/quelpa/quelpa-use-package.git"))))
+#+end_src
+
 ** Trigger =use-package=
 
 =use-package-always-ensure= set to =t= is equivalent to all =use-package= declaractions having the =:ensure= keyword set to =t=.
@@ -69,6 +85,7 @@ Thanks to [[https://github.com/abrochard/emacs-config/blob/master/configuration.
 
 #+begin_src emacs-lisp :results output silent
   (require 'use-package)
+  (require 'quelpa-use-package)
   (require 'diminish)
 
   (setq use-package-always-ensure t)
@@ -126,7 +143,7 @@ Inhibit startup message and have scratch buffer empty by default.
       (progn
         (dashboard-setup-startup-hook)
         (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
-              dashboard-startup-banner "/Users/will/Dropbox/media/pics/emacs-dashboard-mimikyu.png"
+              dashboard-startup-banner "/Users/will/OneDrive/media/pics/emacs-dashboard-mimikyu.png"
               dashboard-center-content t
               dashboard-projects-backend 'projectile
               dashboard-items '((projects . 10))
@@ -173,7 +190,7 @@ The theme du jour will often change, but I tend to get them via [[https://github
 
 ** Font
 
-Fira Code as font.
+FiraCode Nerd Font as font.
 
 #+begin_src emacs-lisp :results output silent
   (defun willnevillain/set-default-font (font-height)
@@ -255,7 +272,7 @@ I use org-mode currently for daily task tracking and project management. I use =
   (use-package org
 
     :config
-    (setq org-directory "~/Dropbox/org"
+    (setq org-directory "~/OneDrive/org"
            org-log-repeat "time"
            org-deadline-warning-days 5)
 
@@ -281,7 +298,7 @@ I use org-mode currently for daily task tracking and project management. I use =
 
 ** Configure agenda
 
-Likewise, agenda files will live in Dropbox.
+Likewise, agenda files will live in OneDrive.
 
 #+begin_src emacs-lisp :results output silent
   (setq org-agenda-skip-scheduled-if-done t
@@ -356,6 +373,55 @@ It provides features and functions that operate on the project level, such as ju
     :config (magit-todos-mode t))
 #+end_src
 
+* Configure =ace-window=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package ace-window
+    :bind ("M-o" . ace-window)
+    :config (setq aw-keys '(?a ?s ?d ?f ?g)))
+#+end_src
+
+* Configure =treemacs=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package treemacs
+    :config
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (when treemacs-python-executable
+        (treemacs-git-commit-diff-mode t))
+
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null treemacs-python-executable)))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+
+      (treemacs-hide-gitignored-files-mode nil)
+    :bind
+    (:map global-map
+          ("M-0"       . treemacs-select-window)
+          ("C-x t 1"   . treemacs-delete-other-windows)
+          ("C-x t t"   . treemacs)
+          ("C-x t d"   . treemacs-select-directory)
+          ("C-x t B"   . treemacs-bookmark)
+          ("C-x t C-t" . treemacs-find-file)
+          ("C-x t M-t" . treemacs-find-tag)))
+
+  (use-package treemacs-projectile
+    :after (treemacs projectile)
+    :ensure t)
+
+  (use-package treemacs-icons-dired
+    :hook (dired-mode . treemacs-icons-dired-enable-once)
+    :ensure t)
+
+  (use-package treemacs-magit
+    :after (treemacs magit)
+    :ensure t)
+#+end_src
+
 * Programming environment
 
 Anything related to a specific programming language, or programming major mode adjacent, lives here.
@@ -368,6 +434,15 @@ Anything related to a specific programming language, or programming major mode a
   (use-package flycheck
     :config
     (global-flycheck-mode))
+
+  (use-package flycheck-projectile)
+#+end_src
+
+** Configure =editorconfig=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package editorconfig
+    :config (editorconfig-mode 1))
 #+end_src
 
 ** Configure =company=
@@ -394,6 +469,28 @@ Anything related to a specific programming language, or programming major mode a
     (company-quickhelp-mode))
 #+end_src
 
+** Configure =copilot=
+
+[[https://github.com/copilot-emacs/copilot.el][copilot]] is the GitHub AI completion tool.
+
+After installation, run =M-x copilot-install-server= and =M-x copilot-login= respectively.
+
+#+begin_src emacs-lisp :results output silent
+  ;; (use-package copilot
+  ;;   :quelpa (copilot :fetcher git
+  ;;                    :url "https://github.com/copilot-emacs/copilot.el.git")
+  ;;   :hook (lsp-mode . copilot-mode)
+  ;;   :bind
+  ;;   (:map copilot-completion-map
+  ;;         ("<tab>" . 'copilot-accept-completion)
+  ;;         ("TAB" . 'copilot-accept-completion)
+  ;;         ("C-n" . 'copilot-next-completion)
+  ;;         ("C-p" . 'copilot-previous-completion))
+  ;;   :config
+  ;;   (add-to-list 'copilot-indentation-alist '(prog-mode 2)))
+#+end_src
+
+
 ** LSP
 
 *** Install and configure =lsp-mode=
@@ -405,6 +502,9 @@ Anything related to a specific programming language, or programming major mode a
 
     :hook
     (lsp-mode . lsp-enable-which-key-integration)
+
+    :bind
+    (:map lsp-mode-map ("C-c l a c" . copilot-accept-completion))
 
     :config
     (setq lsp-file-watch-threshold 1500)
@@ -420,13 +520,22 @@ Anything related to a specific programming language, or programming major mode a
     :config
     (which-key-mode))
 
+  (use-package dap-mode
+    :init
+    (setq dap-auto-configure-features '(sessions locals controls tooltip)))
+
+  (require 'dap-dlv-go)
+
   (advice-add 'lsp-execute-code-action :after (lambda (r) (call-interactively 'lsp)))
 #+end_src
 
-** Configure =go-mode=
+** Configure for =go=
+
+=go-mode= and =gotest=
 
 #+begin_src emacs-lisp :results output silent
-  (use-package go-mode)
+  (use-package go-mode
+    :bind ("C-c g t" . go-test-current-test))
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
 
   (add-hook 'go-mode-hook #'lsp-deferred)
@@ -437,6 +546,8 @@ Anything related to a specific programming language, or programming major mode a
     (add-hook 'before-save-hook #'lsp-format-buffer t t)
     (add-hook 'before-save-hook #'lsp-organize-imports t t))
   (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+  (use-package gotest)
 #+end_src
 
 ** Configure development adjacent major modes
@@ -449,6 +560,21 @@ Anything related to a specific programming language, or programming major mode a
   (use-package yaml-mode)
 #+end_src
 
+*** Install =protobuf-mode=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package protobuf-mode)
+  (defun wvnix-editorconfig-format-before-save-hook ()
+    (add-hook 'before-save-hook #'editorconfig-format-buffer))
+  (add-hook 'protobuf-mode-hook #'wvnix-editorconfig-format-before-save-hook)
+#+end_src
+
+*** Install =graphql-mode=
+
+#+begin_src emacs-lisp :results output silent
+    (use-package graphql-mode
+      :mode ("\\.graphql\\'" . graphql-mode))
+#+end_src
 *** Install =markdown-mode=
 
 [[https://github.com/jrblevin/markdown-mode][markdown-mode]] provides Markdown editing support.
@@ -518,6 +644,13 @@ The [[https://github.com/abrochard][author]] gave an interesting talk about how 
 #+begin_src emacs-lisp :results output silent
   (use-package restclient
     :mode (("\\.http\\'" . restclient-mode)))
+#+end_src
+
+* Configure =vterm=
+
+#+begin_src emacs-lisp :results output silent
+  (use-package vterm
+    :bind ("C-c t" . vterm))
 #+end_src
 
 * Configure =eshell=
