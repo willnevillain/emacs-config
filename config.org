@@ -138,19 +138,19 @@ Inhibit startup message and have scratch buffer empty by default.
 ** Emacs Dashboard
 
 #+begin_src emacs-lisp :results output silent
-    (use-package dashboard
-      :config
-      (progn
-        (dashboard-setup-startup-hook)
-        (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
-              dashboard-startup-banner "/Users/will/OneDrive/media/pics/emacs-dashboard-mimikyu.png"
-              dashboard-center-content t
-              dashboard-projects-backend 'projectile
-              dashboard-items '((projects . 10))
-              dashboard-set-heading-icons t
-              dashboard-set-file-icons t
-              dashboard-set-footer nil
-              dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)))
+  (use-package dashboard
+    :config
+    (progn
+      (dashboard-setup-startup-hook)
+      (setq dashboard-banner-logo-title "Welcome to the Coding Crypt"
+            dashboard-startup-banner "/Users/will/OneDrive/media/pics/emacs-dashboard-mimikyu.png"
+            dashboard-center-content t
+            dashboard-projects-backend 'projectile
+            dashboard-items '((projects . 10))
+            dashboard-set-heading-icons t
+            dashboard-set-file-icons t
+            dashboard-set-footer nil
+            dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)))
 #+end_src
 
 ** General UI / UX tweaks
@@ -184,8 +184,11 @@ Auto-indent on =RET= in addition to usual =C-j=.
 The theme du jour will often change, but I tend to get them via [[https://github.com/hlissner/emacs-doom-themes][=emacs-doom-themes=]].
 
 #+begin_src emacs-lisp :results output silent
-  (use-package doom-themes
-    :init (load-theme 'doom-tomorrow-night t))
+  (use-package doom-themes)
+    ;; :init (load-theme 'doom-tomorrow-day t))
+
+  (use-package solarized-theme
+    :init (load-theme 'solarized-light t))
 #+end_src
 
 ** Font
@@ -273,8 +276,8 @@ I use org-mode currently for daily task tracking and project management. I use =
 
     :config
     (setq org-directory "~/OneDrive/org"
-           org-log-repeat "time"
-           org-deadline-warning-days 5)
+          org-log-repeat "time"
+          org-deadline-warning-days 5)
 
     (require 'org-habit)
     (add-to-list 'org-modules 'org-habit)
@@ -386,19 +389,19 @@ It provides features and functions that operate on the project level, such as ju
 #+begin_src emacs-lisp :results output silent
   (use-package treemacs
     :config
-      (treemacs-follow-mode t)
-      (treemacs-filewatch-mode t)
-      (when treemacs-python-executable
-        (treemacs-git-commit-diff-mode t))
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
 
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
 
-      (treemacs-hide-gitignored-files-mode nil)
+    (treemacs-hide-gitignored-files-mode nil)
     :bind
     (:map global-map
           ("M-0"       . treemacs-select-window)
@@ -564,16 +567,16 @@ After installation, run =M-x copilot-install-server= and =M-x copilot-login= res
 
 #+begin_src emacs-lisp :results output silent
   (use-package protobuf-mode)
-  (defun wvnix-editorconfig-format-before-save-hook ()
-    (add-hook 'before-save-hook #'editorconfig-format-buffer))
-  (add-hook 'protobuf-mode-hook #'wvnix-editorconfig-format-before-save-hook)
+  ;; (defun wvnix-editorconfig-format-before-save-hook ()
+  ;;   (add-hook 'before-save-hook #'editorconfig-format-buffer))
+  ;; (add-hook 'protobuf-mode-hook #'wvnix-editorconfig-format-before-save-hook)
 #+end_src
 
 *** Install =graphql-mode=
 
 #+begin_src emacs-lisp :results output silent
-    (use-package graphql-mode
-      :mode ("\\.graphql\\'" . graphql-mode))
+  (use-package graphql-mode
+    :mode ("\\.graphql\\'" . graphql-mode))
 #+end_src
 *** Install =markdown-mode=
 
@@ -592,8 +595,8 @@ After installation, run =M-x copilot-install-server= and =M-x copilot-login= res
 #+begin_src emacs-lisp :results output silent
   (use-package json-mode
     :hook (json-mode . (lambda ()
-              (make-local-variable 'js-indent-level)
-              (setq js-indent-level 2))))
+                         (make-local-variable 'js-indent-level)
+                         (setq js-indent-level 2))))
 #+end_src
 
 *** Install =dockerfile-mode=
@@ -675,8 +678,8 @@ Recommended reading / viewing to demystify =eshell=:
           eshell-prefer-lisp-functions nil ;; Prefer external commands to Lisp functions
           eshell-destroy-buffer-when-process-dies t) ;; When eshell process exists, destroy buffer
     (add-hook 'eshell-mode-hook
-            (lambda ()
-              (define-key eshell-mode-map (kbd "C-r") 'counsel-esh-history))))
+              (lambda ()
+                (define-key eshell-mode-map (kbd "C-r") 'counsel-esh-history))))
 
 #+end_src
 
